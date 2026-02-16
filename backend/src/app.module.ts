@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { ProductModule } from './product/product.module';
@@ -10,14 +9,17 @@ import { OrderModule } from './order/order.module';
 import { PaymentModule } from './payment/payment.module';
 import { ProfileModule } from './profile/profile.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { loadEnvFile } from 'process';
 import dbConfig from './config/dbConfig';
 import appEnvConfig from './config/appEnv.config';
 import validationConfig from './config/validationConfig';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import authConfig from './auth/config/authConfig';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtAuthGuard } from './auth/guard/jwt.auth.guard';
 
 const env = process.env.NODE_ENV
+console.log(`Currently in ${env?.trim()} mode`);
+
 
 @Module({
    imports: [
@@ -52,6 +54,11 @@ const env = process.env.NODE_ENV
       ProfileModule
    ],
    controllers: [AppController],
-   providers: [AppService],
+   providers: [AppService,
+      {
+         provide: APP_GUARD,
+         useClass: JwtAuthGuard
+      }
+   ],
 })
 export class AppModule { }

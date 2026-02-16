@@ -19,6 +19,13 @@ export class UserService {
    }
 
 
+   //* ------------- FIND USER BY ID -------------------
+   async findOne(userId: string) {
+      return await this.userRepo.findOneBy({ id: userId });
+   }
+
+
+
    //* ----------------SIGN UP ----------
    async signUP(createUserDto: CreateUserDto) {
       createUserDto.profile = createUserDto.profile ?? {}
@@ -64,4 +71,9 @@ export class UserService {
       return user;
    }
 
+
+   //* ---------------- UPDATE REFRESH TOKEN ------------------
+   async updateRefreshToken(userId: string, hashedRefreshToken: string) {
+      return this.userRepo.update({ id: userId }, { hashedRefreshToken })
+   }
 }

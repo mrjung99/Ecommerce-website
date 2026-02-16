@@ -1,3 +1,4 @@
+import { IsNotEmpty, IsString } from "class-validator";
 import { Role } from "src/auth/enums/role.enum";
 import { Profile } from "src/profile/entities/profile.entity";
 import { Column, CreateDateColumn, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
@@ -26,6 +27,12 @@ export class User {
       default: Role.USER
    })
    role: Role
+
+   @Column({
+      type: 'text',
+      nullable: true
+   })
+   hashedRefreshToken: string | null
 
    @CreateDateColumn()
    createdAt: Date

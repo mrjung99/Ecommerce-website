@@ -3,6 +3,8 @@ import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { LocalAuthGuard } from './guard/local.auth.guard';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
+import { Public } from 'src/common/decorator/public.decorator';
+import { RefreshAuthGuard } from './guard/refresh.auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -12,6 +14,7 @@ export class AuthController {
 
 
    //* -------------------CREATE ACCOUNT -----------------
+   @Public()
    @Post('signup')
    async signup(@Body() createUserDto: CreateUserDto) {
       const user = await this.authService.createAccount(createUserDto);
@@ -28,6 +31,7 @@ export class AuthController {
 
 
    //* --------------- LOGIN ---------------------
+   @Public()
    @UseGuards(LocalAuthGuard)
    @Post('login')
    @HttpCode(HttpStatus.OK)
@@ -39,5 +43,14 @@ export class AuthController {
          message: "Login successful!!",
          token
       }
+   }
+
+
+   //* -------------- REFRESH TOKEN -------------------
+   @Public()
+   @UseGuards(RefreshAuthGuard)
+   @Post('refresh')
+   async refreshToken(@Request() req: any) {
+      return await this.authService.getRefreshToken(req.user.id)
    }
 }
