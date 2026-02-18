@@ -16,6 +16,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import authConfig from './auth/config/authConfig';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/guard/jwt.auth.guard';
+import { ProductImageModule } from './product-image/product-image.module';
+import { CloudinaryModule } from './cloudinary/cloudinary.module';
+import { CartItemModule } from './cart-item/cart-item.module';
+import { CartModule } from './cart/cart.module';
 
 const env = process.env.NODE_ENV
 console.log(`Currently in ${env?.trim()} mode`);
@@ -51,7 +55,11 @@ console.log(`Currently in ${env?.trim()} mode`);
       CategoryModule,
       OrderModule,
       PaymentModule,
-      ProfileModule
+      ProfileModule,
+      ProductImageModule,
+      CloudinaryModule,
+      CartModule,
+      CartItemModule
    ],
    controllers: [AppController],
    providers: [AppService,

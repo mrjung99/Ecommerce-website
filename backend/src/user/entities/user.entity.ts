@@ -1,5 +1,5 @@
-import { IsNotEmpty, IsString } from "class-validator";
 import { Role } from "src/auth/enums/role.enum";
+import { Cart } from "src/cart/entities/cart.entity";
 import { Profile } from "src/profile/entities/profile.entity";
 import { Column, CreateDateColumn, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
@@ -8,6 +8,7 @@ export class User {
    @PrimaryGeneratedColumn("uuid")
    id: string
 
+
    @Column({
       type: 'varchar',
       nullable: false,
@@ -15,11 +16,13 @@ export class User {
    })
    email: string
 
+
    @Column({
       type: 'text',
       nullable: false,
    })
    password_hashed: string
+
 
    @Column({
       type: 'enum',
@@ -28,22 +31,30 @@ export class User {
    })
    role: Role
 
+
    @Column({
       type: 'text',
       nullable: true
    })
    hashedRefreshToken: string | null
 
+
    @CreateDateColumn()
    createdAt: Date
+
 
    @UpdateDateColumn()
    updatedAt: Date
 
+
    @OneToOne(() => Profile, profile => profile.user, {
       eager: true,
-      cascade: ['insert', 'remove']
+      cascade: true
    })
    @JoinColumn()
    profile: Profile
+
+
+   @OneToOne(() => Cart, cart => cart.user)
+   cart: Cart
 }
