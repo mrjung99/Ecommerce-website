@@ -1,4 +1,4 @@
-import { IsDecimal, IsInt, IsNotEmpty, IsString } from "class-validator"
+import { ArrayNotEmpty, IsArray, IsInt, IsNotEmpty, IsNumber, IsString } from "class-validator"
 
 export class CreateProductDto {
    @IsString()
@@ -9,7 +9,7 @@ export class CreateProductDto {
    @IsNotEmpty()
    description: string
 
-   @IsDecimal()
+   @IsNumber({ maxDecimalPlaces: 2 })
    @IsNotEmpty()
    price: number
 
@@ -17,8 +17,8 @@ export class CreateProductDto {
    @IsNotEmpty()
    stock: number
 
-   @IsString()
-   @IsNotEmpty()
+   @IsArray()
+   @ArrayNotEmpty()
+   @IsString({ each: true })
    productImages: string[]
-
 }
