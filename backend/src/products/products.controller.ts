@@ -7,10 +7,12 @@ import {
   Get,
   NotFoundException,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { PaginationDto } from 'src/common/pagination/dto/pagination-query.dto';
 
 @Controller('products')
 export class ProductsController {
@@ -50,8 +52,9 @@ export class ProductsController {
 
   //* ------------------------ GET ALL PRODUCT -------------------
   @Get()
-  async getAllProducts() {
-    const data = await this.productsService.getAllProduct();
+  async getAllProducts(@Query() paginationDto: PaginationDto) {
+    const data = await this.productsService.getAllProduct(paginationDto);
+
     return {
       status: 'success',
       data,

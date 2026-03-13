@@ -7,6 +7,7 @@ import { ProductsModule } from './products/products.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { pgConfig } from './configuration/db.configuration';
 import { ConfigModule } from '@nestjs/config';
+import { PaginationModule } from './common/pagination/pagination.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { ConfigModule } from '@nestjs/config';
       // envFilePath: '.env',
       isGlobal: true,
     }),
+    PaginationModule,
   ],
   controllers: [AppController],
   providers: [AppService],

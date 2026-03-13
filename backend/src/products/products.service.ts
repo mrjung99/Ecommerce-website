@@ -9,12 +9,16 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import { Repository } from 'typeorm';
 import { Product } from './entities/product.entity';
 import { InjectRepository } from '@nestjs/typeorm';
+import { PaginationDto } from 'src/common/pagination/dto/pagination-query.dto';
+import { PaginationProvider } from 'src/common/pagination/pagination.provider';
+import { Paginated } from 'src/common/pagination/pagination.interface';
 
 @Injectable()
 export class ProductsService {
   constructor(
     @InjectRepository(Product)
     private readonly productRepo: Repository<Product>,
+    private readonly paginationProvider: PaginationProvider,
   ) {}
 
   //* ----------------------- ADD PRODUCT ---------------------
@@ -50,8 +54,13 @@ export class ProductsService {
   }
 
   //* ----------------------- GET ALL PRODUCT ---------------------
-  async getAllProduct() {
-    return this.productRepo.find();
+  async getAllProduct(
+    paginationDto: PaginationDto,
+  ): Promise<Paginated<Product>> {
+    return this.paginationProvider.paginationQuery(
+      paginationDto,
+      this.productRepo,
+    );
   }
 
   //* ----------------------- GET PRODUCT BY ID ---------------------
