@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
@@ -15,6 +20,7 @@ export class UsersService {
   //* ------------------CREATE USER --------------
   async createUser(createUserDto: CreateUserDto) {
     try {
+      createUserDto.profile = createUserDto.profile ?? {};
       const hashedPassword = await argon2.hash(createUserDto.password);
       const user = this.userRepo.create({
         ...createUserDto,
@@ -44,5 +50,22 @@ export class UsersService {
   //* ------------------ FIND USER BY ID--------------
   async findUserById(userId: string) {
     return await this.userRepo.findOneBy({ id: userId });
+  }
+
+  //* ------------------ VALIDATE JWT USER --------------
+  async validateJwtUser(userId: string) {
+    const user = this.userRepo.findOne({
+      where: { id: userId },
+      select: {
+        id: true,
+        role: true,
+      },
+    });
+
+    if (!user) {
+      throw new UnauthorizedException();
+    }
+
+    return user;
   }
 }

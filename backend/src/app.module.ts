@@ -8,6 +8,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { pgConfig } from './configuration/db.configuration';
 import { ConfigModule } from '@nestjs/config';
 import { PaginationModule } from './common/pagination/pagination.module';
+import { ProfileModule } from './profile/profile.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { PaginationModule } from './common/pagination/pagination.module';
       isGlobal: true,
     }),
     PaginationModule,
+    ProfileModule,
   ],
   controllers: [AppController],
   providers: [AppService],

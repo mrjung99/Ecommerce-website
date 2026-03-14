@@ -1,4 +1,11 @@
-import { IsEmail, IsNotEmpty, IsString, Length } from 'class-validator';
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  Length,
+} from 'class-validator';
+import { Profile } from 'src/profile/entities/profile.entity';
 
 export class CreateUserDto {
   @IsEmail()
@@ -9,4 +16,7 @@ export class CreateUserDto {
   @IsNotEmpty()
   @Length(8, 100)
   password: string;
+
+  @IsOptional()
+  profile: Profile;
 }

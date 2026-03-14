@@ -1,4 +1,12 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Role } from 'src/auth/enum/role.enum';
+import { Profile } from 'src/profile/entities/profile.entity';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 @Entity()
 export class User {
@@ -17,4 +25,19 @@ export class User {
     nullable: false,
   })
   password: string;
+
+  @Column({
+    type: 'enum',
+    enum: Role,
+    enumName: 'user_role',
+    default: Role.USER,
+  })
+  role: Role;
+
+  @OneToOne(() => Profile, (profile) => profile.user, {
+    eager: true,
+    cascade: ['insert', 'remove'],
+  })
+  @JoinColumn()
+  profile: Profile;
 }

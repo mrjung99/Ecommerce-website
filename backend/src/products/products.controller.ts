@@ -13,12 +13,15 @@ import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { PaginationDto } from 'src/common/pagination/dto/pagination-query.dto';
+import { Roles } from 'src/auth/decorator/roles.decorator';
+import { Role } from 'src/auth/enum/role.enum';
 
 @Controller('products')
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
   //* ------------------- CREATE PRODUCT -------------------
+  @Roles(Role.ADMIN, Role.MODERATOR)
   @Post()
   async addProduct(@Body() createProductDto: CreateProductDto) {
     const product = await this.productsService.create(createProductDto);
@@ -32,6 +35,7 @@ export class ProductsController {
   }
 
   //* ------------------------ UPDATE PRODUCT -------------------
+  @Roles(Role.ADMIN, Role.MODERATOR)
   @Patch(':id')
   async updateProduct(
     @Param('id') id: string,
@@ -76,6 +80,7 @@ export class ProductsController {
   }
 
   //* ----------------------- DELETE PRODUCT ---------------------
+  @Roles(Role.ADMIN, Role.MODERATOR)
   @Delete(':id')
   async deleteProduct(@Param('id') id: string) {
     const product = await this.productsService.deleteProduct(id);

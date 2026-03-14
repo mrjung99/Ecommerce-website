@@ -16,6 +16,7 @@ export class PaginationProvider {
     @Inject(REQUEST)
     private readonly request: Request,
   ) {}
+
   public async paginationQuery<T extends ObjectLiteral>(
     paginationDto: PaginationDto,
     repository: Repository<T>,
