@@ -6,6 +6,7 @@ import authConfig from './configuration/authConfig';
 import { JwtService } from '@nestjs/jwt';
 import refreshConfig from './configuration/refreshConfig';
 import * as argon2 from 'argon2';
+import { Response } from 'express';
 
 @Injectable()
 export class AuthService {
@@ -37,29 +38,33 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials!!');
     }
 
-    if (user && isPasswordMatched) {
-      const { password: _, ...userWithoutPass } = user;
-      return userWithoutPass;
-    }
-
-    return null;
+    const { password: _, ...userWithoutPass } = user;
+    return userWithoutPass;
   }
 
   //* --------------------- LOGIN ----------------
-  async login(userId: string) {
+  async login(userId: string, res: Response) {
     const user = await this.userService.findUserById(userId);
     if (!user) {
       throw new UnauthorizedException();
     }
 
     const { accessToken, refreshToken } = await this.generateToken(userId);
-    return {
-      accessToken,
-      refreshToken,
-    };
+    const hashedRefreshToken = await argon2.hash(refreshToken);
+    await this.userService.saveHashedRefreshToken(userId, hashedRefreshToken);
+
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'strict',
+      path: '/auth/refresh',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    return { accessToken };
   }
 
-  //* ----------------- GENERATE TOKEN ---------------
+  //* ----------------------- GENERATE TOKEN -----------------------
   async generateToken(userId: string) {
     const payload = { sub: userId };
     const [accessToken, refreshToken] = await Promise.all([
@@ -71,5 +76,36 @@ export class AuthService {
       accessToken,
       refreshToken,
     };
+  }
+
+  //* ------------------------ REFRESH TOKEN ----------------------
+  async refreshToken(userId: string, reqRefreshToken: string, res: Response) {
+    const user = await this.userService.findUserById(userId);
+    if (!user) {
+      throw new UnauthorizedException();
+    }
+
+    const isRefreshTokenMatched = await argon2.verify(
+      user.hashedRefreshToken,
+      reqRefreshToken,
+    );
+
+    if (!isRefreshTokenMatched) {
+      throw new UnauthorizedException();
+    }
+
+    const { accessToken, refreshToken } = await this.generateToken(userId);
+    const hashedRefreshToken = await argon2.hash(refreshToken);
+
+    await this.userService.saveHashedRefreshToken(userId, hashedRefreshToken);
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'strict',
+      path: '/auth/refresh',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    return { accessToken };
   }
 }

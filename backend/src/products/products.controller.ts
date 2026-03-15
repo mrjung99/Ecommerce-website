@@ -21,8 +21,8 @@ export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
   //* ------------------- CREATE PRODUCT -------------------
-  @Roles(Role.ADMIN, Role.MODERATOR)
   @Post()
+  @Roles(Role.ADMIN, Role.MODERATOR)
   async addProduct(@Body() createProductDto: CreateProductDto) {
     const product = await this.productsService.create(createProductDto);
 
@@ -35,8 +35,8 @@ export class ProductsController {
   }
 
   //* ------------------------ UPDATE PRODUCT -------------------
-  @Roles(Role.ADMIN, Role.MODERATOR)
   @Patch(':id')
+  @Roles(Role.ADMIN, Role.MODERATOR)
   async updateProduct(
     @Param('id') id: string,
     @Body() updateProductDto: UpdateProductDto,
@@ -80,8 +80,8 @@ export class ProductsController {
   }
 
   //* ----------------------- DELETE PRODUCT ---------------------
-  @Roles(Role.ADMIN, Role.MODERATOR)
   @Delete(':id')
+  @Roles(Role.ADMIN, Role.MODERATOR)
   async deleteProduct(@Param('id') id: string) {
     const product = await this.productsService.deleteProduct(id);
     if (!product) {

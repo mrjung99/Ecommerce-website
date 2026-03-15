@@ -1,7 +1,6 @@
 import {
   BadRequestException,
   Injectable,
-  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -67,5 +66,10 @@ export class UsersService {
     }
 
     return user;
+  }
+
+  //* ------------------ SAVE HASHED REFRESH TOKEN --------------
+  async saveHashedRefreshToken(userId: string, hashedRefreshToken: string) {
+    return await this.userRepo.update({ id: userId }, { hashedRefreshToken });
   }
 }

@@ -34,6 +34,12 @@ export class User {
   })
   role: Role;
 
+  @Column({
+    type: 'text',
+    nullable: true,
+  })
+  hashedRefreshToken: string;
+
   @OneToOne(() => Profile, (profile) => profile.user, {
     eager: true,
     cascade: ['insert', 'remove'],
