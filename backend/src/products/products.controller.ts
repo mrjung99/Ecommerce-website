@@ -8,6 +8,7 @@ import {
   NotFoundException,
   Delete,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -15,12 +16,15 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import { PaginationDto } from 'src/common/pagination/dto/pagination-query.dto';
 import { Roles } from 'src/auth/decorator/roles.decorator';
 import { Role } from 'src/auth/enum/role.enum';
+import RolesGuard from 'src/auth/guard/roles.guard';
+import { Public } from 'src/auth/decorator/public.decorator';
 
 @Controller('products')
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
   //* ------------------- CREATE PRODUCT -------------------
+  @UseGuards(RolesGuard)
   @Post()
   @Roles(Role.ADMIN, Role.MODERATOR)
   async addProduct(@Body() createProductDto: CreateProductDto) {
@@ -35,6 +39,7 @@ export class ProductsController {
   }
 
   //* ------------------------ UPDATE PRODUCT -------------------
+  @UseGuards(RolesGuard)
   @Patch(':id')
   @Roles(Role.ADMIN, Role.MODERATOR)
   async updateProduct(
@@ -55,6 +60,7 @@ export class ProductsController {
   }
 
   //* ------------------------ GET ALL PRODUCT -------------------
+  @Public()
   @Get()
   async getAllProducts(@Query() paginationDto: PaginationDto) {
     const data = await this.productsService.getAllProduct(paginationDto);
@@ -80,6 +86,7 @@ export class ProductsController {
   }
 
   //* ----------------------- DELETE PRODUCT ---------------------
+  @UseGuards(RolesGuard)
   @Delete(':id')
   @Roles(Role.ADMIN, Role.MODERATOR)
   async deleteProduct(@Param('id') id: string) {

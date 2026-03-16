@@ -11,14 +11,17 @@ import {
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
-import { LocalAuthGuard } from './guard/loacl.auth.guard';
+import { LocalAuthGuard } from './guard/local.auth';
 import type { Response } from 'express';
+import { RefreshAuthGuard } from './guard/refresh.auth.guard';
+import { Public } from './decorator/public.decorator';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   //* --------------- CREATE USER ---------------
+  @Public()
   @Post('signup')
   async createUser(@Body() createUserDto: CreateUserDto) {
     const createUser = await this.authService.createUser(createUserDto);
@@ -27,13 +30,14 @@ export class AuthController {
       return { status: 'success', message: 'User created successfully!!' };
     }
 
-    return new BadRequestException({
+    throw new BadRequestException({
       status: 'fail',
       message: 'Something went wrong!!',
     });
   }
 
   //* --------------- LOGIN ---------------
+  @Public()
   @UseGuards(LocalAuthGuard)
   @Post('login')
   @HttpCode(HttpStatus.OK)
@@ -43,11 +47,14 @@ export class AuthController {
     return { status: 'success', message: 'Login successful!!', token };
   }
 
-  //* --------------- LOGIN ---------------
+  //* --------------- REFRESH ROUTE ---------------
+  @Public()
+  @UseGuards(RefreshAuthGuard)
   @Post('refresh')
+  @HttpCode(HttpStatus.OK)
   async refresh(@Req() req: any, @Res({ passthrough: true }) res: Response) {
     const userId = req.user.id;
-    const refreshToken = req.cookie.refreshToken;
+    const refreshToken = req.cookies.refreshToken;
     const token = await this.authService.refreshToken(
       userId,
       refreshToken,

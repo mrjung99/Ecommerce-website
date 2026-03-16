@@ -53,7 +53,7 @@ export class UsersService {
 
   //* ------------------ VALIDATE JWT USER --------------
   async validateJwtUser(userId: string) {
-    const user = this.userRepo.findOne({
+    const user = await this.userRepo.findOne({
       where: { id: userId },
       select: {
         id: true,

@@ -9,6 +9,8 @@ import { pgConfig } from './configuration/db.configuration';
 import { ConfigModule } from '@nestjs/config';
 import { PaginationModule } from './common/pagination/pagination.module';
 import { ProfileModule } from './profile/profile.module';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtAuthGuard } from './auth/guard/jwt.auth.guard';
 
 @Module({
   imports: [
@@ -24,6 +26,12 @@ import { ProfileModule } from './profile/profile.module';
     ProfileModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+  ],
 })
 export class AppModule {}
