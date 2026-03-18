@@ -1,5 +1,7 @@
 import {
   BadRequestException,
+  forwardRef,
+  Inject,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -8,22 +10,27 @@ import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as argon2 from 'argon2';
+import { ProfileService } from 'src/profile/profile.service';
+import { Profile } from 'src/profile/entities/profile.entity';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
+    @InjectRepository(Profile)
+    private readonly profileRepo: Repository<Profile>,
   ) {}
 
   //* ------------------CREATE USER --------------
   async createUser(createUserDto: CreateUserDto) {
     try {
-      createUserDto.profile = createUserDto.profile ?? {};
+      const profile = this.profileRepo.create(createUserDto.profile || {});
       const hashedPassword = await argon2.hash(createUserDto.password);
       const user = this.userRepo.create({
         ...createUserDto,
         password: hashedPassword,
+        profile,
       });
 
       await this.userRepo.save(user);
@@ -71,5 +78,10 @@ export class UsersService {
   //* ------------------ SAVE HASHED REFRESH TOKEN --------------
   async saveHashedRefreshToken(userId: string, hashedRefreshToken: string) {
     return await this.userRepo.update({ id: userId }, { hashedRefreshToken });
+  }
+
+  //* ------------------ SAVE USER --------------
+  async saveProfile(user: User) {
+    return await this.userRepo.save(user);
   }
 }
