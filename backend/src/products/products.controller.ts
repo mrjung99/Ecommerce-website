@@ -9,6 +9,9 @@ import {
   Delete,
   Query,
   UseGuards,
+  UseInterceptors,
+  UploadedFiles,
+  UploadedFile,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -18,6 +21,7 @@ import { Roles } from 'src/auth/decorator/roles.decorator';
 import { Role } from 'src/auth/enum/role.enum';
 import RolesGuard from 'src/auth/guard/roles.guard';
 import { Public } from 'src/auth/decorator/public.decorator';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('products')
 export class ProductsController {
@@ -27,8 +31,12 @@ export class ProductsController {
   @UseGuards(RolesGuard)
   @Post()
   @Roles(Role.ADMIN, Role.MODERATOR)
-  async addProduct(@Body() createProductDto: CreateProductDto) {
-    const product = await this.productsService.create(createProductDto);
+  @UseInterceptors(FileInterceptor('image'))
+  async addProduct(
+    @Body() createProductDto: CreateProductDto,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    const product = await this.productsService.create(createProductDto, file);
 
     if (product) {
       return {
@@ -42,13 +50,16 @@ export class ProductsController {
   @UseGuards(RolesGuard)
   @Patch(':id')
   @Roles(Role.ADMIN, Role.MODERATOR)
+  @UseInterceptors(FileInterceptor('image'))
   async updateProduct(
     @Param('id') id: string,
     @Body() updateProductDto: UpdateProductDto,
+    @UploadedFile() file: Express.Multer.File,
   ) {
     const updatedProduct = await this.productsService.update(
       id,
       updateProductDto,
+      file,
     );
 
     if (updatedProduct) {
@@ -64,6 +75,7 @@ export class ProductsController {
   @Get()
   async getAllProducts(@Query() paginationDto: PaginationDto) {
     const data = await this.productsService.getAllProduct(paginationDto);
+    console.log('PRODUCT DATA', data);
 
     return {
       status: 'success',

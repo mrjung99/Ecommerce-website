@@ -14,14 +14,14 @@ import { JwtAuthGuard } from './auth/guard/jwt.auth.guard';
 
 @Module({
   imports: [
-    UsersModule,
-    AuthModule,
-    ProductsModule,
-    TypeOrmModule.forRoot(pgConfig),
     ConfigModule.forRoot({
       // envFilePath: '.env',
       isGlobal: true,
     }),
+    UsersModule,
+    AuthModule,
+    ProductsModule,
+    TypeOrmModule.forRoot(pgConfig),
     PaginationModule,
     ProfileModule,
   ],

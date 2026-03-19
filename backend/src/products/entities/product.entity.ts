@@ -46,5 +46,24 @@ export class Product {
   @Column({
     type: 'text',
   })
-  images: string;
+  thumbnail_url: string;
+
+  @Column({
+    type: 'text',
+  })
+  medium_url: string;
+
+  @Column({
+    type: 'text',
+  })
+  zoom_url: string;
+
+  @Column({ type: 'text', nullable: true })
+  imagePublicId: string;
+
+  @Column({
+    type: 'text',
+    nullable: true,
+  })
+  originalUrl: string;
 }
