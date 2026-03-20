@@ -11,6 +11,7 @@ import { Profile } from './entities/profile.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UsersService } from 'src/users/users.service';
 import { User } from 'src/users/entities/user.entity';
+import { ImageUploadService } from 'src/image-upload/image-upload.service';
 
 @Injectable()
 export class ProfileService {
@@ -21,6 +22,7 @@ export class ProfileService {
     private readonly userService: UsersService,
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
+    private readonly imageUploadService: ImageUploadService,
   ) {}
 
   //* ------------------------- CREATE PROFILE -------------------
@@ -38,7 +40,11 @@ export class ProfileService {
   }
 
   //* ------------------------- UPDATE PROFILE -------------------
-  async updateProfile(userId: string, updateProfileDto: UpdateProfileDto) {
+  async updateProfile(
+    userId: string,
+    updateProfileDto: UpdateProfileDto,
+    file?: Express.Multer.File,
+  ) {
     const user = await this.userService.findUserById(userId);
     if (!user) {
       throw new NotFoundException('User not found!!');
@@ -49,8 +55,21 @@ export class ProfileService {
     }
 
     Object.assign(user.profile, updateProfileDto || {});
-    await this.userService.saveProfile(user);
 
+    if (file) {
+      try {
+        const image = await this.imageUploadService.replaceImage(
+          file,
+          user.profile.avatarPublicId,
+          'users',
+        );
+        user.profile.avatarUrl = image.thumbnail;
+        user.profile.avatarPublicId = image.publicId;
+      } catch (error) {
+        console.log('IMAGE UPLOAD FAILED:', error);
+      }
+    }
+    await this.userRepo.save(user);
     return user.profile;
   }
 

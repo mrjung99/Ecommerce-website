@@ -12,6 +12,9 @@ import {
   UseInterceptors,
   UploadedFiles,
   UploadedFile,
+  ParseFilePipe,
+  MaxFileSizeValidator,
+  FileTypeValidator,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -21,7 +24,7 @@ import { Roles } from 'src/auth/decorator/roles.decorator';
 import { Role } from 'src/auth/enum/role.enum';
 import RolesGuard from 'src/auth/guard/roles.guard';
 import { Public } from 'src/auth/decorator/public.decorator';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FilesInterceptor } from '@nestjs/platform-express';
 
 @Controller('products')
 export class ProductsController {
@@ -31,12 +34,20 @@ export class ProductsController {
   @UseGuards(RolesGuard)
   @Post()
   @Roles(Role.ADMIN, Role.MODERATOR)
-  @UseInterceptors(FileInterceptor('image'))
+  @UseInterceptors(FilesInterceptor('images', 5))
   async addProduct(
     @Body() createProductDto: CreateProductDto,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFiles(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({ maxSize: 2 * 1024 * 1024 }), // 2MB
+          new FileTypeValidator({ fileType: 'image/(jpeg|png|webp)' }),
+        ],
+      }),
+    )
+    files: Express.Multer.File[],
   ) {
-    const product = await this.productsService.create(createProductDto, file);
+    const product = await this.productsService.create(createProductDto, files);
 
     if (product) {
       return {
@@ -50,16 +61,24 @@ export class ProductsController {
   @UseGuards(RolesGuard)
   @Patch(':id')
   @Roles(Role.ADMIN, Role.MODERATOR)
-  @UseInterceptors(FileInterceptor('image'))
+  @UseInterceptors(FilesInterceptor('images', 5))
   async updateProduct(
     @Param('id') id: string,
     @Body() updateProductDto: UpdateProductDto,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFiles(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({ maxSize: 5 * 1024 * 1024 }),
+          new FileTypeValidator({ fileType: 'image/(jpeg|png|webp)' }),
+        ],
+      }),
+    )
+    files: Express.Multer.File[],
   ) {
     const updatedProduct = await this.productsService.update(
       id,
       updateProductDto,
-      file,
+      files,
     );
 
     if (updatedProduct) {

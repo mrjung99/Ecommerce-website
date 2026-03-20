@@ -40,8 +40,4 @@ export class CreateProfileDto {
   @IsString()
   @IsOptional()
   zipcode: string;
-
-  @IsString()
-  @IsOptional()
-  profileImage: string;
 }

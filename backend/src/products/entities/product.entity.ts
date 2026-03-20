@@ -1,5 +1,5 @@
-import { IsNotEmpty, IsString } from 'class-validator';
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { ProductImage } from './product-image.entity';
 
 @Entity()
 export class Product {
@@ -43,27 +43,9 @@ export class Product {
   })
   price: number;
 
-  @Column({
-    type: 'text',
+  @OneToMany(() => ProductImage, (img) => img.product, {
+    cascade: true,
+    eager: true,
   })
-  thumbnail_url: string;
-
-  @Column({
-    type: 'text',
-  })
-  medium_url: string;
-
-  @Column({
-    type: 'text',
-  })
-  zoom_url: string;
-
-  @Column({ type: 'text', nullable: true })
-  imagePublicId: string;
-
-  @Column({
-    type: 'text',
-    nullable: true,
-  })
-  originalUrl: string;
+  images: ProductImage[];
 }

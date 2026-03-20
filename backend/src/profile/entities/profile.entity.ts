@@ -67,10 +67,14 @@ export class Profile {
   zipcode: string;
 
   @Column({
-    type: 'text',
     nullable: true,
   })
-  profileImage: string;
+  avatarUrl?: string;
+
+  @Column({
+    nullable: true,
+  })
+  avatarPublicId?: string;
 
   @OneToOne(() => User, (user) => user.profile)
   user: User;

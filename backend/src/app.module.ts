@@ -11,6 +11,7 @@ import { PaginationModule } from './common/pagination/pagination.module';
 import { ProfileModule } from './profile/profile.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/guard/jwt.auth.guard';
+import { ImageUploadModule } from './image-upload/image-upload.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { JwtAuthGuard } from './auth/guard/jwt.auth.guard';
     TypeOrmModule.forRoot(pgConfig),
     PaginationModule,
     ProfileModule,
+    ImageUploadModule,
   ],
   controllers: [AppController],
   providers: [
