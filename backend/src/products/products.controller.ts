@@ -25,6 +25,7 @@ import { Role } from 'src/auth/enum/role.enum';
 import RolesGuard from 'src/auth/guard/roles.guard';
 import { Public } from 'src/auth/decorator/public.decorator';
 import { FilesInterceptor } from '@nestjs/platform-express';
+import { FilterProductDto } from './dto/filter-product.dto';
 
 @Controller('products')
 export class ProductsController {
@@ -92,8 +93,14 @@ export class ProductsController {
   //* ------------------------ GET ALL PRODUCT -------------------
   @Public()
   @Get()
-  async getAllProducts(@Query() paginationDto: PaginationDto) {
-    const data = await this.productsService.getAllProduct(paginationDto);
+  async getAllProducts(
+    @Query() paginationDto: PaginationDto,
+    @Query() filterProductDto: FilterProductDto,
+  ) {
+    const data = await this.productsService.getAllProduct(
+      paginationDto,
+      filterProductDto,
+    );
     console.log('PRODUCT DATA', data);
 
     return {

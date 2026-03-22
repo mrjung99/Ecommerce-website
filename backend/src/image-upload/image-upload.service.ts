@@ -11,7 +11,7 @@ export class ImageUploadService {
 
   //* -------------------- COMPRESS IMAGE -----------------
   private async compressImage(buffer: Buffer): Promise<Buffer> {
-    return sharp(buffer)
+    return await sharp(buffer)
       .resize(1500, 1500, {
         fit: 'inside',
         withoutEnlargement: true,
@@ -49,7 +49,7 @@ export class ImageUploadService {
     file: Express.Multer.File,
     oldPublicId?: string,
     folder: string = 'default',
-  ) {
+  ): Promise<UploadedImage> {
     if (oldPublicId) {
       await this.deleteImage(oldPublicId);
     }

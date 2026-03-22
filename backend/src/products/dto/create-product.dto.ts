@@ -16,7 +16,7 @@ export class CreateProductDto {
 
   @IsNotEmpty()
   @IsString()
-  category: string;
+  categoryId: string;
 
   @IsInt()
   @IsNotEmpty()

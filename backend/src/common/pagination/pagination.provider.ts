@@ -21,22 +21,25 @@ export class PaginationProvider {
     paginationDto: PaginationDto,
     repository: Repository<T>,
     where?: FindOptionsWhere<T>,
+    relations?: string[],
   ): Promise<Paginated<T>> {
+    const page = paginationDto.page ?? 1;
+    const limit = paginationDto.limit ?? 10;
+
     const findOptions: FindManyOptions<T> = {
-      skip: ((paginationDto.page ?? 1) - 1) * (paginationDto.limit ?? 10),
-      take: paginationDto.limit ?? 10,
+      skip: (page - 1) * limit,
+      take: limit,
+      where,
+      relations,
     };
 
-    if (where) {
-      findOptions.where = where;
-    }
     const result = await repository.find(findOptions);
 
     const totalItems = await repository.count();
-    const totalPages = Math.ceil(totalItems / (paginationDto.limit ?? 10));
-    const currentPage = paginationDto.page;
+    const totalPages = Math.ceil(totalItems / limit);
+    const currentPage = page;
     const nextPages =
-      currentPage === totalPages ? paginationDto.page : (currentPage ?? 1) + 1;
+      currentPage === totalPages ? page : (currentPage ?? 1) + 1;
     const previousPage =
       currentPage === 1 ? currentPage : (currentPage ?? 1) - 1;
     const baseUrl =
@@ -51,11 +54,11 @@ export class PaginationProvider {
         totalPage: totalPages,
       },
       links: {
-        first: `${newUrl.origin}+${newUrl.pathname}?limit=${paginationDto.limit}&page=1`,
-        last: `${newUrl.origin}+${newUrl.pathname}?limit=${paginationDto.limit}&page=${totalPages}`,
-        current: `${newUrl.origin}+${newUrl.pathname}?limit=${paginationDto.limit}&page=${currentPage}`,
-        next: `${newUrl.origin}+${newUrl.pathname}?limit=${paginationDto.limit}&page=${nextPages}`,
-        previous: `${newUrl.origin}+${newUrl.pathname}?limit=${paginationDto.limit}&page=${previousPage}`,
+        first: `${newUrl.origin}${newUrl.pathname}?limit=${limit}&page=1`,
+        last: `${newUrl.origin}${newUrl.pathname}?limit=${limit}&page=${totalPages}`,
+        current: `${newUrl.origin}${newUrl.pathname}?limit=${limit}&page=${currentPage}`,
+        next: `${newUrl.origin}${newUrl.pathname}?limit=${limit}&page=${nextPages}`,
+        previous: `${newUrl.origin}${newUrl.pathname}?limit=${limit}&page=${previousPage}`,
       },
     };
 

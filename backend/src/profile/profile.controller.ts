@@ -1,11 +1,8 @@
 import {
   Controller,
-  Get,
   Post,
   Body,
   Patch,
-  Param,
-  Delete,
   Req,
   UploadedFile,
   ParseFilePipe,
@@ -57,11 +54,7 @@ export class ProfileController {
     file?: Express.Multer.File,
   ) {
     const userId = req.user.id;
-    const updatedProfile = await this.profileService.updateProfile(
-      userId,
-      updateProfileDto,
-      file,
-    );
+    await this.profileService.updateProfile(userId, updateProfileDto, file);
     return {
       status: 'success',
       message: 'Profile updated successfully!!',

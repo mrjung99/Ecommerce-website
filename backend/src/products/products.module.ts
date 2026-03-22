@@ -6,10 +6,11 @@ import { Product } from './entities/product.entity';
 import { PaginationModule } from 'src/common/pagination/pagination.module';
 import { ImageUploadModule } from 'src/image-upload/image-upload.module';
 import { ProductImage } from './entities/product-image.entity';
+import { ProductCategory } from './entities/product-category.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Product, ProductImage]),
+    TypeOrmModule.forFeature([Product, ProductImage, ProductCategory]),
     PaginationModule,
     ImageUploadModule,
   ],

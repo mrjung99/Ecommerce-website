@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { Repository } from 'typeorm';
+import { Between, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 import { Product } from './entities/product.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PaginationDto } from 'src/common/pagination/dto/pagination-query.dto';
@@ -19,6 +19,8 @@ import { Readable } from 'stream';
 import sharp from 'sharp';
 import { ImageUploadService } from 'src/image-upload/image-upload.service';
 import { ProductImage } from './entities/product-image.entity';
+import { FilterProductDto } from './dto/filter-product.dto';
+import { ProductCategory } from './entities/product-category.entity';
 
 @Injectable()
 export class ProductsService {
@@ -27,6 +29,8 @@ export class ProductsService {
     private readonly productRepo: Repository<Product>,
     @InjectRepository(ProductImage)
     private readonly productImageRepo: Repository<ProductImage>,
+    @InjectRepository(ProductCategory)
+    private readonly categoryRepo: Repository<ProductCategory>,
     private readonly paginationProvider: PaginationProvider,
     private readonly imageUploadService: ImageUploadService,
   ) {}
@@ -43,9 +47,18 @@ export class ProductsService {
         'products',
       );
 
+      const category = await this.categoryRepo.findOne({
+        where: { id: createProductDto.categoryId },
+      });
+
+      if (!category) {
+        throw new NotFoundException('Category not found');
+      }
+
       const product = this.productRepo.create({
         ...createProductDto,
         images,
+        category,
       });
       return await this.productRepo.save(product);
     } catch (error) {
@@ -93,10 +106,29 @@ export class ProductsService {
   //* ----------------------- GET ALL PRODUCT ---------------------
   async getAllProduct(
     paginationDto: PaginationDto,
+    filterProductDto: FilterProductDto,
   ): Promise<Paginated<Product>> {
+    const { categorySlug, minPrice, maxPrice } = filterProductDto;
+    const where: any = {};
+    if (categorySlug) {
+      where.category = {
+        slug: categorySlug,
+      };
+    }
+
+    if (minPrice && maxPrice) {
+      where.price = Between(minPrice, maxPrice);
+    } else if (minPrice) {
+      where.price = MoreThanOrEqual(minPrice);
+    } else if (maxPrice) {
+      where.price = LessThanOrEqual(maxPrice);
+    }
+
     return this.paginationProvider.paginationQuery(
       paginationDto,
       this.productRepo,
+      where,
+      ['category'],
     );
   }
 

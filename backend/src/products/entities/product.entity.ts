@@ -1,5 +1,12 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { ProductImage } from './product-image.entity';
+import { ProductCategory } from './product-category.entity';
 
 @Entity()
 export class Product {
@@ -24,11 +31,6 @@ export class Product {
   brand: string;
 
   @Column({
-    type: 'varchar',
-  })
-  category: string;
-
-  @Column({
     type: 'int',
     nullable: false,
     default: 0,
@@ -42,6 +44,9 @@ export class Product {
     nullable: false,
   })
   price: number;
+
+  @ManyToOne(() => ProductCategory, (c) => c.products)
+  category: ProductCategory;
 
   @OneToMany(() => ProductImage, (img) => img.product, {
     cascade: true,
