@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { IsOptional, IsString, isString } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 
 export class FilterProductDto {
   @IsString()

@@ -1,6 +1,5 @@
 import {
   BadRequestException,
-  Get,
   Injectable,
   Logger,
   NotFoundException,
@@ -13,14 +12,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { PaginationDto } from 'src/common/pagination/dto/pagination-query.dto';
 import { PaginationProvider } from 'src/common/pagination/pagination.provider';
 import { Paginated } from 'src/common/pagination/pagination.interface';
-import cloudinary from 'src/configuration/cloudinary.configuration';
-import { UploadApiResponse } from 'cloudinary';
-import { Readable } from 'stream';
-import sharp from 'sharp';
 import { ImageUploadService } from 'src/image-upload/image-upload.service';
 import { ProductImage } from './entities/product-image.entity';
 import { FilterProductDto } from './dto/filter-product.dto';
-import { ProductCategory } from './entities/product-category.entity';
+import { ProductCategory } from 'src/product-category/entities/product-category.entity';
 
 @Injectable()
 export class ProductsService {
@@ -49,10 +44,18 @@ export class ProductsService {
 
       const category = await this.categoryRepo.findOne({
         where: { id: createProductDto.categoryId },
+        relations: ['children'],
       });
 
       if (!category) {
         throw new NotFoundException('Category not found');
+      }
+
+      // Prevent assigning product to parent category
+      if (category.children && category.children.length > 0) {
+        throw new BadRequestException(
+          'Cannot assign product to a parent category. Use a subcategory.',
+        );
       }
 
       const product = this.productRepo.create({
@@ -76,8 +79,31 @@ export class ProductsService {
     files?: Express.Multer.File[],
   ) {
     try {
-      const product = await this.productRepo.findOneBy({ id });
+      const product = await this.productRepo.findOne({
+        where: { id },
+        relations: ['images', 'category'],
+      });
       if (!product) throw new NotFoundException('Product not found');
+
+      if (dto.categoryId) {
+        const category = await this.categoryRepo.findOne({
+          where: { id: dto.categoryId },
+          relations: ['children'],
+        });
+
+        if (!category) {
+          throw new NotFoundException('Category not found!!');
+        }
+
+        // PREVENT ASSIGNING TO PARENT CATEGORY
+        if (category.children && category.children.length > 0) {
+          throw new BadRequestException(
+            'Can not assign product to a parent category. Use a subcategory.',
+          );
+        }
+
+        product.category = category;
+      }
 
       Object.assign(product, dto);
 
@@ -139,6 +165,31 @@ export class ProductsService {
 
   //* ----------------------- DELETE PRODUCT ---------------------
   async deleteProduct(productId: string) {
+    const product = await this.productRepo.findOne({
+      where: { id: productId },
+      relations: ['images'],
+    });
+
+    if (!product) {
+      throw new NotFoundException(
+        `Product with the id: ${productId} not found!!`,
+      );
+    }
+
+    // DELETE IMAGES FORM CLOUDINARY
+    if (product.images && product.images.length > 0) {
+      await Promise.all(
+        product.images.map((img) =>
+          this.imageUploadService.deleteImage(img.publicId),
+        ),
+      );
+    }
+
+    // DELETE IMAGE RECORDS FROM PRODUCT IMAGE TABLE
+    await this.productImageRepo.delete({
+      product: { id: productId },
+    });
+
     return await this.productRepo.delete(productId);
   }
 }

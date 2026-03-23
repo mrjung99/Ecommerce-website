@@ -1,11 +1,12 @@
+import { Product } from 'src/products/entities/product.entity';
 import {
   Column,
   Entity,
   ManyToMany,
+  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Product } from './product.entity';
 
 @Entity()
 export class ProductCategory {
@@ -22,11 +23,11 @@ export class ProductCategory {
   })
   slug: string;
 
-  @ManyToMany(() => ProductCategory, (c) => c.children, { nullable: true })
-  parent: ProductCategory;
+  @ManyToOne(() => ProductCategory, (c) => c.children, { nullable: true })
+  parent: ProductCategory | null;
 
   @OneToMany(() => ProductCategory, (c) => c.parent)
-  children: ProductCategory;
+  children: ProductCategory[];
 
   @OneToMany(() => Product, (p) => p.category)
   products: Product[];

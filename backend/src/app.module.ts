@@ -12,6 +12,7 @@ import { ProfileModule } from './profile/profile.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/guard/jwt.auth.guard';
 import { ImageUploadModule } from './image-upload/image-upload.module';
+import { ProductCategoryModule } from './product-category/product-category.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { ImageUploadModule } from './image-upload/image-upload.module';
     PaginationModule,
     ProfileModule,
     ImageUploadModule,
+    ProductCategoryModule,
   ],
   controllers: [AppController],
   providers: [

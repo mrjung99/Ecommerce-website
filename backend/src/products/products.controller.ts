@@ -72,9 +72,10 @@ export class ProductsController {
           new MaxFileSizeValidator({ maxSize: 5 * 1024 * 1024 }),
           new FileTypeValidator({ fileType: 'image/(jpeg|png|webp)' }),
         ],
+        fileIsRequired: false,
       }),
     )
-    files: Express.Multer.File[],
+    files?: Express.Multer.File[],
   ) {
     const updatedProduct = await this.productsService.update(
       id,
@@ -101,7 +102,6 @@ export class ProductsController {
       paginationDto,
       filterProductDto,
     );
-    console.log('PRODUCT DATA', data);
 
     return {
       status: 'success',
@@ -129,13 +129,10 @@ export class ProductsController {
   @Roles(Role.ADMIN, Role.MODERATOR)
   async deleteProduct(@Param('id') id: string) {
     const product = await this.productsService.deleteProduct(id);
-    if (!product) {
-      throw new NotFoundException();
-    }
 
     return {
       status: 'success',
-      message: 'Product deleted successfully!!',
+      message: `Product with the id: ${id}, has been deleted successfully!!`,
     };
   }
 }
