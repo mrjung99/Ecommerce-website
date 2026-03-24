@@ -1,4 +1,5 @@
 import { Role } from 'src/auth/enum/role.enum';
+import { Cart } from 'src/cart/entities/cart.entity';
 import { Profile } from 'src/profile/entities/profile.entity';
 import {
   Column,
@@ -46,4 +47,7 @@ export class User {
   })
   @JoinColumn()
   profile: Profile;
+
+  @OneToOne(() => Cart, (cart) => cart.user, { cascade: true })
+  cart: Cart;
 }

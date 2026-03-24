@@ -13,6 +13,8 @@ import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/guard/jwt.auth.guard';
 import { ImageUploadModule } from './image-upload/image-upload.module';
 import { ProductCategoryModule } from './product-category/product-category.module';
+import { CartModule } from './cart/cart.module';
+import { CartItemModule } from './cart-item/cart-item.module';
 
 @Module({
   imports: [
@@ -28,6 +30,8 @@ import { ProductCategoryModule } from './product-category/product-category.modul
     ProfileModule,
     ImageUploadModule,
     ProductCategoryModule,
+    CartModule,
+    CartItemModule,
   ],
   controllers: [AppController],
   providers: [

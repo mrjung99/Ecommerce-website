@@ -3,10 +3,12 @@ import {
   Entity,
   ManyToOne,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { ProductImage } from './product-image.entity';
 import { ProductCategory } from 'src/product-category/entities/product-category.entity';
+import { User } from 'src/users/entities/user.entity';
 
 @Entity()
 export class Product {
