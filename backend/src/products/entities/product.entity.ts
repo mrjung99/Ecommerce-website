@@ -9,6 +9,7 @@ import {
 import { ProductImage } from './product-image.entity';
 import { ProductCategory } from 'src/product-category/entities/product-category.entity';
 import { User } from 'src/users/entities/user.entity';
+import { CartItem } from 'src/cart/entities/cart-item.entity';
 
 @Entity()
 export class Product {
@@ -55,4 +56,7 @@ export class Product {
     eager: true,
   })
   images: ProductImage[];
+
+  @OneToMany(() => CartItem, (cartItem) => cartItem.product)
+  cartItems: CartItem[];
 }

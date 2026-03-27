@@ -18,5 +18,6 @@ import { ProductCategory } from 'src/product-category/entities/product-category.
   ],
   controllers: [ProductsController],
   providers: [ProductsService],
+  exports: [TypeOrmModule],
 })
 export class ProductsModule {}

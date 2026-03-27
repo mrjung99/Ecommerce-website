@@ -1,4 +1,3 @@
-import { CartItem } from 'src/cart-item/entities/cart-item.entity';
 import { User } from 'src/users/entities/user.entity';
 import {
   CreateDateColumn,
@@ -9,6 +8,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { CartItem } from './cart-item.entity';
 
 @Entity()
 export class Cart {

@@ -14,7 +14,6 @@ import { JwtAuthGuard } from './auth/guard/jwt.auth.guard';
 import { ImageUploadModule } from './image-upload/image-upload.module';
 import { ProductCategoryModule } from './product-category/product-category.module';
 import { CartModule } from './cart/cart.module';
-import { CartItemModule } from './cart-item/cart-item.module';
 
 @Module({
   imports: [
@@ -31,7 +30,6 @@ import { CartItemModule } from './cart-item/cart-item.module';
     ImageUploadModule,
     ProductCategoryModule,
     CartModule,
-    CartItemModule,
   ],
   controllers: [AppController],
   providers: [
