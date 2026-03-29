@@ -1,10 +1,12 @@
 import { Role } from 'src/auth/enum/role.enum';
 import { Cart } from 'src/cart/entities/cart.entity';
+import { Order } from 'src/order/entities/order.entity';
 import { Profile } from 'src/profile/entities/profile.entity';
 import {
   Column,
   Entity,
   JoinColumn,
+  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -50,4 +52,7 @@ export class User {
 
   @OneToOne(() => Cart, (cart) => cart.user, { cascade: true })
   cart: Cart;
+
+  @OneToMany(() => Order, (order) => order.user)
+  orders: Order[];
 }
