@@ -16,7 +16,11 @@ export class OrderItem {
   @Column()
   productName: string;
 
-  @Column()
+  @Column({
+    type: 'decimal',
+    precision: 10,
+    scale: 2,
+  })
   price: number;
 
   @Column()

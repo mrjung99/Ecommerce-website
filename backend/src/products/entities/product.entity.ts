@@ -8,7 +8,6 @@ import {
 } from 'typeorm';
 import { ProductImage } from './product-image.entity';
 import { ProductCategory } from 'src/product-category/entities/product-category.entity';
-import { User } from 'src/users/entities/user.entity';
 import { CartItem } from 'src/cart/entities/cart-item.entity';
 
 @Entity()
@@ -57,6 +56,6 @@ export class Product {
   })
   images: ProductImage[];
 
-  @OneToMany(() => CartItem, (cartItem) => cartItem.product)
+  @OneToMany(() => CartItem, (cartItem) => cartItem.product, { cascade: true })
   cartItems: CartItem[];
 }

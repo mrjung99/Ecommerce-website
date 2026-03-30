@@ -52,6 +52,7 @@ export class ProfileService {
 
     if (!user.profile) {
       user.profile = this.profileRepo.create({});
+      await this.profileRepo.save(user.profile);
     }
 
     Object.assign(user.profile, updateProfileDto || {});

@@ -9,6 +9,9 @@ export class PaymentProvider {
   private esewaBaseUrl = process.env.ESEWA_BASE_URL || '';
   private appUrl = process.env.APP_URL;
 
+  private khaltiSecretKey = process.env.KHALTI_SECRET_KEY;
+  private khaltiBaseUrl = process.env.KHALTI_BASE_URL;
+
   //!=================== ESEWA ============================================
   //* ------------------------- GENERATE SIGNATURE ESEWA ----------------------------
   private generateEsewaSignature(orderid: string, amount: number) {
@@ -36,7 +39,7 @@ export class PaymentProvider {
       failure_url: `${this.appUrl}/orders/esewa/failure`,
       signed_field_names: `total_amount,transaction_uuid,product_code`,
       signature,
-      payment_url: `${this.esewaBaseUrl}/api/epay/main/v2/form/`,
+      payment_url: 'https://rc-epay.esewa.com.np/api/epay/main/v2/form',
     };
   }
 
@@ -50,23 +53,80 @@ export class PaymentProvider {
       console.log(`eSewa decoded response: `, decodedData);
 
       const response = await axios.get(
-        `${this.esewaBaseUrl}/api/epay/transaction/status/`,
+        `${this.esewaBaseUrl}/api/epay/transaction/status/?product_code=${this.productCode}&total_amount=${decodedData.total_amount}&transaction_uuid=${decodedData.transaction_uuid}`,
+      );
+
+      console.log(`eSewa status response: `, response.data);
+
+      return {
+        status: response.data.status,
+        ref_id: response.data.ref_id ?? null,
+        orderId: decodedData.transaction_uuid,
+      };
+    } catch (error) {
+      console.log('eSewa verification error message:', error?.message);
+      console.log('eSewa verification error response:', error?.response?.data);
+      console.log('eSewa verification error status:', error?.response?.status);
+      throw new BadRequestException(
+        error?.response?.data?.message ?? 'eSewa verification failed',
+      );
+    }
+  }
+
+  //!=================== KHALTI ============================================
+  async initiateKhaltiPayment(
+    orderId: string,
+    amount: number,
+    customerName: string,
+    customerEmail: string,
+  ) {
+    try {
+      const response = await axios.post(
+        `${this.khaltiBaseUrl}/epayment/initiate/`,
         {
-          params: {
-            product_code: this.productCode,
-            transaction_uuid: decodedData.transaction_uuid,
-            total_amount: decodedData.total_amount,
+          return_url: `${this.appUrl}/orders/khalti/verify`,
+          website_url: this.appUrl,
+          amount: amount * 100,
+          purchase_order_id: orderId,
+          purchase_order_name: `Order #${orderId}`,
+          customer_info: {
+            name: customerName,
+            email: customerEmail,
+          },
+        },
+        {
+          headers: {
+            Authorization: `key ${this.khaltiSecretKey}`,
           },
         },
       );
 
-      return {
-        ...response.data,
-        orderId: decodedData.transaction_uuid,
-      };
+      return response.data;
+      // this will return {pidx, payment_url, expires_at}
     } catch (error) {
-      console.log(`eSewa verification error: `, error.response.data);
-      throw new BadRequestException('eSewa verification failed.');
+      console.log(`Khalti initiation error: ${error.response.data}`);
+      throw new BadRequestException('Khalti payment initiation failed.');
+    }
+  }
+
+  //* ------------------------- VERIFY KHALTI PAYMENT ----------------------------
+  async verifyKhaltiPayment(pidx: string) {
+    try {
+      const response = await axios.post(
+        `${this.khaltiBaseUrl}/epayment/lookup/`,
+        { pidx },
+        {
+          headers: {
+            Authorization: `Key ${this.khaltiSecretKey}`,
+          },
+        },
+      );
+
+      return response.data;
+      // this will return {status, transaction_id, total_amount}
+    } catch (error) {
+      console.log(`Khalti verification error: ${error.response.data}`);
+      throw new BadRequestException('Khalti verification failed.');
     }
   }
 }

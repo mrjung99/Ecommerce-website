@@ -76,6 +76,6 @@ export class Profile {
   })
   avatarPublicId?: string;
 
-  @OneToOne(() => User, (user) => user.profile)
+  @OneToOne(() => User, (user) => user.profile, { onDelete: 'CASCADE' })
   user: User;
 }
