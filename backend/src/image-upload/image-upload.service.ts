@@ -10,8 +10,8 @@ export class ImageUploadService {
   private readonly logger = new Logger(ImageUploadService.name);
 
   //* -------------------- COMPRESS IMAGE -----------------
-  private async compressImage(buffer: Buffer): Promise<Buffer> {
-    return await sharp(buffer)
+  private compressImage(buffer: Buffer): Promise<Buffer> {
+    return sharp(buffer)
       .resize(1500, 1500, {
         fit: 'inside',
         withoutEnlargement: true,
@@ -29,9 +29,19 @@ export class ImageUploadService {
     file: Express.Multer.File,
     folder: string,
   ): Promise<UploadedImage> {
-    const compressedBuffer = await this.compressImage(file.buffer);
-    const upload = await this.streamUpload(compressedBuffer, folder);
-    return this.buildImageUrls(upload);
+    const compressedBuffer = this.compressImage(file.buffer);
+
+    // Upload when compression is ready (chaining, not waiting sequentially) called Promise Chaining + Parallel Asynchronous
+    const upload = compressedBuffer.then((buffer) =>
+      this.streamUpload(buffer, folder),
+    );
+
+    // wait for upload result only once
+    const result = await upload;
+    return this.buildImageUrls(result);
+
+    //  const upload = await this.streamUpload(compressedBuffer, folder);
+    //  return this.buildImageUrls(upload);
   }
 
   //* ------------------ UPLOAD MULTIPLE IMAGE -------------------
