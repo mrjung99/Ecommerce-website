@@ -26,6 +26,7 @@ import RolesGuard from 'src/auth/guard/roles.guard';
 import { Public } from 'src/auth/decorator/public.decorator';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { FilterProductDto } from './dto/filter-product.dto';
+import { SkipThrottle } from '@nestjs/throttler';
 
 @Controller('products')
 export class ProductsController {
@@ -93,6 +94,7 @@ export class ProductsController {
 
   //* ------------------------ GET ALL PRODUCT -------------------
   @Public()
+  @SkipThrottle()
   @Get()
   async getAllProducts(
     @Query() paginationDto: PaginationDto,

@@ -15,9 +15,14 @@ async function bootstrap() {
       },
     }),
   );
+
   app.use(cookieParser());
+
+  app.enableCors({ origin: process.env.FRONTEND_URL, Credential: true });
+
   await app.listen(process.env.PORT ?? 3000);
 }
+
 bootstrap().catch((err) => {
   console.log('Application failed to start', err);
   process.exit(1);

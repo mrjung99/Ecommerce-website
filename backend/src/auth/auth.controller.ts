@@ -15,6 +15,7 @@ import { LocalAuthGuard } from './guard/local.auth.guard';
 import type { Response } from 'express';
 import { RefreshAuthGuard } from './guard/refresh.auth.guard';
 import { Public } from './decorator/public.decorator';
+import { Throttle } from '@nestjs/throttler';
 
 @Controller('auth')
 export class AuthController {
@@ -22,6 +23,7 @@ export class AuthController {
 
   //* --------------- CREATE USER ---------------
   @Public()
+  @Throttle({ short: { ttl: 3600000, limit: 3 } })
   @Post('signup')
   async createUser(@Body() createUserDto: CreateUserDto) {
     const createUser = await this.authService.createUser(createUserDto);
@@ -38,6 +40,7 @@ export class AuthController {
 
   //* --------------- LOGIN ---------------
   @Public()
+  @Throttle({ short: { ttl: 60000, limit: 5 } })
   @UseGuards(LocalAuthGuard)
   @Post('login')
   @HttpCode(HttpStatus.OK)
@@ -49,6 +52,7 @@ export class AuthController {
 
   //* --------------- REFRESH ROUTE ---------------
   @Public()
+  @Throttle({ short: { ttl: 60000, limit: 20 } })
   @UseGuards(RefreshAuthGuard)
   @Post('refresh')
   @HttpCode(HttpStatus.OK)

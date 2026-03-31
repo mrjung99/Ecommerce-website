@@ -16,6 +16,7 @@ import { ProductCategoryModule } from './product-category/product-category.modul
 import { CartModule } from './cart/cart.module';
 import { OrderModule } from './order/order.module';
 import { PaymentModule } from './payment/payment.module';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 
 @Module({
   imports: [
@@ -34,6 +35,11 @@ import { PaymentModule } from './payment/payment.module';
     CartModule,
     OrderModule,
     PaymentModule,
+    ThrottlerModule.forRoot([
+      { name: 'short', ttl: 1000, limit: 10 },
+      { name: 'medium', ttl: 60000, limit: 50 },
+      { name: 'long', ttl: 900000, limit: 200 },
+    ]),
   ],
   controllers: [AppController],
   providers: [
@@ -41,6 +47,10 @@ import { PaymentModule } from './payment/payment.module';
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
     },
   ],
 })
