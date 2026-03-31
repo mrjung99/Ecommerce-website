@@ -35,7 +35,7 @@ export class PaginationProvider {
 
     const result = await repository.find(findOptions);
 
-    const totalItems = await repository.count();
+    const totalItems = await repository.count({ where });
     const totalPages = Math.ceil(totalItems / limit);
     const currentPage = page;
     const nextPages =

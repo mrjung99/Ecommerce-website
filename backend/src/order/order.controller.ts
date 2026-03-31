@@ -112,6 +112,10 @@ export class OrderController {
     @Query('paymentMethod') paymentMethod?: PaymentMethod,
   ) {
     const orders = await this.orderService.getAllOrders(status, paymentMethod);
+    return {
+      success: true,
+      orders,
+    };
   }
 
   //* --------------------- ADMIN: update order status ------------------------------

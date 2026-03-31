@@ -39,13 +39,13 @@ export class CartController {
   async updateItem(
     @Request() req,
     @Param('itemId') itemId: string,
-    dto: UpdateCartItemDto,
+    @Body() dto: UpdateCartItemDto,
   ) {
     return await this.cartService.updateCartItem(req.user.id, itemId, dto);
   }
 
   //* ------------------- DELETE ITEM FROM CART ---------------
-  @Delete('itemId')
+  @Delete(':itemId')
   async deleteItem(@Request() req, @Param('itemId') itemId: string) {
     const item = await this.cartService.removeItem(req.user.id, itemId);
     return {

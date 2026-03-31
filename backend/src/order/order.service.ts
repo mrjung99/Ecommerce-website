@@ -16,9 +16,6 @@ import { CreateOrderDto } from './dto/create-order.dto';
 import { PaymentMethod } from 'src/common/enum/payment-method.enum';
 import { PaymentStatus } from 'src/common/enum/payment.status';
 import { User } from 'src/users/entities/user.entity';
-import { pid } from 'process';
-import { log } from 'console';
-import { use } from 'passport';
 import { UpdateStatusDto } from './dto/update-status.dto';
 
 @Injectable()
