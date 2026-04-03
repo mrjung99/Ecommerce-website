@@ -100,14 +100,14 @@ export class ProductsController {
     @Query() paginationDto: PaginationDto,
     @Query() filterProductDto: FilterProductDto,
   ) {
-    const data = await this.productsService.getAllProduct(
+    const products = await this.productsService.getAllProduct(
       paginationDto,
       filterProductDto,
     );
 
     return {
       status: 'success',
-      data,
+      products,
     };
   }
 

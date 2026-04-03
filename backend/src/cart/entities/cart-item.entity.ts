@@ -26,6 +26,15 @@ export class CartItem {
   @Column({ type: 'int', default: 1 })
   quantity: number;
 
+  @Column({
+    type: 'decimal',
+    precision: 10,
+    scale: 2,
+    nullable: false,
+    default: 0,
+  })
+  snapshotPrice: number;
+
   @CreateDateColumn()
   createdAt: Date;
 

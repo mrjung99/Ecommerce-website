@@ -17,6 +17,8 @@ import { PaymentMethod } from 'src/common/enum/payment-method.enum';
 import { PaymentStatus } from 'src/common/enum/payment.status';
 import { User } from 'src/users/entities/user.entity';
 import { UpdateStatusDto } from './dto/update-status.dto';
+import { Product } from 'src/products/entities/product.entity';
+import * as crypto from 'crypto';
 
 @Injectable()
 export class OrderService {
@@ -29,6 +31,8 @@ export class OrderService {
     private readonly profileRepo: Repository<Profile>,
     @InjectRepository(Payment)
     private readonly paymentRepo: Repository<Payment>,
+    @InjectRepository(Product)
+    private readonly productRepo: Repository<Product>,
     private readonly paymentProvider: PaymentProvider,
     private readonly cartService: CartService,
   ) {}
@@ -128,16 +132,45 @@ export class OrderService {
       }
     }
 
-    // step 3 - resolve shipping address
+    //? step 3 - resolve shipping address
     const shippingAddress = await this.resolveShippingAddress(userId);
 
-    // step 4 - calculate total amount
+    //? step 4 - check stock and decrement automatically for each cart item
+    for (const cartItem of cart.items) {
+      const { quantity } = cartItem;
+
+      // DECREMENT THE STOCK OF THE PRODUCT
+      await this.productRepo.decrement(
+        { id: cartItem.product.id },
+        'stock',
+        quantity,
+      );
+
+      // RE-FETCH TO CHECK THE STOCK AFTER DECREMENT
+      const updatedProduct = await this.productRepo.findOne({
+        where: { id: cartItem.product.id },
+      });
+
+      // WHILE DECREMENT IF THE STOCK WENT TO NEGATIVE RESTORE OUR DECREMENT TO THE ORIGINAL STOCK AND THROW ERROR
+      if (!updatedProduct || updatedProduct.stock < 0) {
+        await this.productRepo.increment(
+          { id: cartItem.product.id },
+          'stock',
+          quantity,
+        );
+        throw new BadRequestException(
+          `${cartItem.product.name} is out of stock. Please update your cart. Available stock is ${cartItem.product.stock}`,
+        );
+      }
+    }
+
+    //? step 5 - calculate total amount
     const totalAmount = cart.items.reduce(
-      (sum, item) => sum + item.product.price * item.quantity,
+      (sum, item) => sum + Number(item.snapshotPrice) * item.quantity,
       0,
     );
 
-    // step 5 - create order
+    //? step 6 - create order
     const order = this.orderRepo.create({
       user: { id: userId } as any,
       totalAmount,
@@ -149,7 +182,7 @@ export class OrderService {
 
     console.log(`Order created: ${order.id} for user: ${userId}`);
 
-    // step 6 - save order items
+    //? step 7 - save order items
     for (const cartItem of cart.items) {
       const orderItem = this.orderItemRepo.create({
         order,
@@ -161,7 +194,7 @@ export class OrderService {
       await this.orderItemRepo.save(orderItem);
     }
 
-    // step 7 - initiate payment
+    //? step 8 - initiate payment
     // --- eSewa
     if (dto.paymentMethod === PaymentMethod.ESEWA) {
       const esewaData = this.paymentProvider.initiateEsewaPayment(
@@ -233,12 +266,44 @@ export class OrderService {
       throw new BadRequestException('Missing payment data from esewa.');
     }
 
-    const result = await this.paymentProvider.verifyEsewaPayment(encodedData);
+    //? DECODE THE BASE64 PAYLOAD ESEWA SENDS BACK
+    let decodedData: any;
+    try {
+      decodedData = JSON.parse(
+        Buffer.from(encodedData, 'base64').toString('utf-8'),
+      );
+    } catch (error) {
+      console.log('Error while decoding payload: ', error);
+      throw new BadRequestException('Invalid payment data format from esewa.');
+    }
 
-    console.log(`eSewa verification result:`, result);
+    //? COMPARE AND VERIFY THE PAYLOAD, without this check an attacker can craft any payload and mark any order as paid without ever paying
+    const signedFields: string = decodedData.signedFields;
+    if (!signedFields) {
+      throw new BadRequestException(
+        'Missing signed_field_names in eSewa callback.',
+      );
+    }
 
+    const expectedMessage = signedFields
+      .split(',')
+      .map((field: string) => `${field}=${decodedData[field]}`)
+      .join(',');
+
+    const expectedSignature = crypto
+      .createHmac('sha256', process.env.ESEWA_SECRET_KEY || '')
+      .update(expectedMessage)
+      .digest('base64');
+
+    if (expectedSignature !== decodedData.signature) {
+      throw new BadRequestException(
+        'eSewa callback signature verification failed.',
+      );
+    }
+
+    //? LOOK UP THE ORDER USING THE transaction_uuid FROM THE DECODED PAYLOAD, AND check for idempotency- payment security
     const order = await this.orderRepo.findOne({
-      where: { id: result.orderId },
+      where: { id: decodedData.orderId },
       relations: ['payment'],
     });
 
@@ -246,7 +311,31 @@ export class OrderService {
       throw new NotFoundException('Order not found.');
     }
 
+    // check for idempotency, if this order is already completed, return success immediately without hitting the eSewa's API/
+    if (order.payment.status === PaymentStatus.COMPLETED) {
+      return {
+        success: true,
+        message: 'Payment already confirmed.',
+        orderId: order.id,
+        status: OrderStatus.PAID,
+      };
+    }
+
+    const result = await this.paymentProvider.verifyEsewaPayment(encodedData);
+
+    console.log(`eSewa verification result:`, result);
+
     if (result.status === 'COMPLETE') {
+      //? confirm the amount (payment security - amount integrity)
+      const confirmedAmount = Number(decodedData.total_amount);
+      const expectedAmount = Number(order.payment.amount);
+
+      if (Math.abs(confirmedAmount - expectedAmount) > 0.01) {
+        throw new BadRequestException(
+          `Payment amount mismatch. Expected Rs ${expectedAmount}, got Rs ${confirmedAmount}`,
+        );
+      }
+
       order.payment.status = PaymentStatus.COMPLETED;
       order.payment.referenceId = result.ref_id;
       order.payment.transactionId = result.orderId;
@@ -275,6 +364,10 @@ export class OrderService {
   async verifyKhaltiPayment(pidx: string) {
     console.log(`Verifying khalti payment, pidx: ${pidx}`);
 
+    if (!pidx) {
+      throw new BadRequestException('Missing pidx from khalti callback.');
+    }
+
     const payment = await this.paymentRepo.findOne({
       where: { pidx },
       relations: ['order'],
@@ -284,11 +377,31 @@ export class OrderService {
       throw new NotFoundException('Payment record not found.');
     }
 
+    //? CHECK FOR IDEMPOTENCY,  already completed - return success without re-processing
+    if ((payment.status = PaymentStatus.COMPLETED)) {
+      return {
+        success: true,
+        message: 'Payment already confirmed.',
+        orderId: payment.order.id,
+        status: OrderStatus.PAID,
+      };
+    }
+
     const result = await this.paymentProvider.verifyKhaltiPayment(pidx);
 
     console.log('Khalti verification result: ', result);
 
     if (result.status === 'Completed') {
+      //? confirm amount, SECURITY - AMOUNT INTEGRITY
+      const confirmedAmount = Number(result.total_amount) / 100;
+      const expectedAmount = Number(payment.amount);
+
+      if (Math.abs(confirmedAmount - expectedAmount) > 0.01) {
+        throw new BadRequestException(
+          `Payment mismatch. Expected Rs ${expectedAmount}, got Rs ${confirmedAmount}.`,
+        );
+      }
+
       payment.status = PaymentStatus.COMPLETED;
       payment.transactionId = result.transaction_id;
       await this.paymentRepo.save(payment);

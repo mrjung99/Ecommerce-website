@@ -75,6 +75,7 @@ export class CartService {
         cart,
         product,
         quantity: dto.quantity,
+        snapshotPrice: product.price,
       });
 
       await this.cartItemRepo.save(newItem);
@@ -137,7 +138,7 @@ export class CartService {
     const cart = await this.getOrCreateCart(userid);
 
     const totalPrice = cart.items.reduce(
-      (sum, item) => sum + item.product.price * item.quantity,
+      (sum, item) => sum + Number(item.snapshotPrice) * item.quantity,
       0,
     );
 

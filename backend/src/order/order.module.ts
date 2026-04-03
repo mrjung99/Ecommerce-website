@@ -11,6 +11,7 @@ import { Profile } from 'src/profile/entities/profile.entity';
 import { PaymentModule } from 'src/payment/payment.module';
 import { ProfileModule } from 'src/profile/profile.module';
 import { CartModule } from 'src/cart/cart.module';
+import { ProductsModule } from 'src/products/products.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { CartModule } from 'src/cart/cart.module';
     PaymentModule,
     ProfileModule,
     CartModule,
+    ProductsModule,
   ],
   controllers: [OrderController],
   providers: [OrderService],
