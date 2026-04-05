@@ -63,7 +63,7 @@ export class PaymentProvider {
         ref_id: response.data.ref_id ?? null,
         orderId: decodedData.transaction_uuid,
       };
-    } catch (error) {
+    } catch (error:any) {
       console.log('eSewa verification error message:', error?.message);
       console.log('eSewa verification error response:', error?.response?.data);
       console.log('eSewa verification error status:', error?.response?.status);
@@ -103,8 +103,8 @@ export class PaymentProvider {
 
       return response.data;
       // this will return {pidx, payment_url, expires_at}
-    } catch (error) {
-      console.log(`Khalti initiation error: ${error.response.data}`);
+    } catch (error:any) {
+      console.log(`Khalti initiation error: ${error?.response?.data}`);
       throw new BadRequestException('Khalti payment initiation failed.');
     }
   }
@@ -124,8 +124,8 @@ export class PaymentProvider {
 
       return response.data;
       // this will return {status, transaction_id, total_amount}
-    } catch (error) {
-      console.log(`Khalti verification error: ${error.response.data}`);
+    } catch (error:any) {      
+      console.log(`Khalti verification error: ${error?.response?.data}`);
       throw new BadRequestException('Khalti verification failed.');
     }
   }

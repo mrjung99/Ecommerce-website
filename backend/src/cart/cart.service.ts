@@ -8,7 +8,7 @@ import { Cart } from './entities/cart.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CartItem } from './entities/cart-item.entity';
 import { AddToCartDto } from './dto/add-to-cart.dto';
-import { Product } from 'src/products/entities/product.entity';
+import { Product } from '../products/entities/product.entity';
 import { UpdateCartItemDto } from './dto/update-cart-item.dto';
 
 @Injectable()

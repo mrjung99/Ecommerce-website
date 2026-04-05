@@ -11,12 +11,12 @@ import {
 } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
-import { Public } from 'src/auth/decorator/public.decorator';
-import { Roles } from 'src/auth/decorator/roles.decorator';
-import { Role } from 'src/auth/enum/role.enum';
-import { OrderStatus } from 'src/common/enum/order-status.enum';
-import { PaymentMethod } from 'src/common/enum/payment-method.enum';
-import RolesGuard from 'src/auth/guard/roles.guard';
+import { Public } from '../auth/decorator/public.decorator';
+import { Roles } from '../auth/decorator/roles.decorator';
+import { Role } from '../auth/enum/role.enum';
+import { OrderStatus } from '../common/enum/order-status.enum';
+import { PaymentMethod } from '../common/enum/payment-method.enum';
+import RolesGuard from '../auth/guard/roles.guard';
 import { UpdateStatusDto } from './dto/update-status.dto';
 
 @Controller('orders')

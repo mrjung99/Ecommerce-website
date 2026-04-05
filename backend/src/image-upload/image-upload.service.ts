@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import sharp from 'sharp';
-import { UploadedImage } from 'src/common/interfaces/upload.image.interface';
-import cloudinary from 'src/configuration/cloudinary.configuration';
+import { UploadedImage } from '../common/interfaces/upload.image.interface';
+import cloudinary from '../configuration/cloudinary.configuration';
 import { Readable } from 'stream';
 import { UploadApiResponse } from 'cloudinary';
 
@@ -93,7 +93,7 @@ export class ImageUploadService {
     try {
       await cloudinary.uploader.destroy(publicId);
       this.logger.log(`Deleted: ${publicId}`);
-    } catch (error) {
+    } catch (error:any) {
       this.logger.warn(`Delete failed: ${error.message}`);
     }
   }

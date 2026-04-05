@@ -1,4 +1,4 @@
-import { Product } from 'src/products/entities/product.entity';
+import { Product } from '../../products/entities/product.entity';
 import {
   Column,
   Entity,
@@ -11,24 +11,24 @@ import {
 @Entity()
 export class ProductCategory {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id!: string;
 
   @Column({
     unique: true,
   })
-  name: string;
+  name!: string;
 
   @Column({
     unique: true,
   })
-  slug: string;
+  slug!: string;
 
   @ManyToOne(() => ProductCategory, (c) => c.children, { nullable: true })
-  parent: ProductCategory | null;
+  parent!: ProductCategory | null;
 
   @OneToMany(() => ProductCategory, (c) => c.parent)
-  children: ProductCategory[];
+  children!: ProductCategory[];
 
   @OneToMany(() => Product, (p) => p.category)
-  products: Product[];
+  products!: Product[];
 }

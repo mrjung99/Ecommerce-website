@@ -1,6 +1,6 @@
-import { OrderStatus } from 'src/common/enum/order-status.enum';
-import { Payment } from 'src/payment/entities/payment.entity';
-import { User } from 'src/users/entities/user.entity';
+import { OrderStatus } from '../../common/enum/order-status.enum';
+import { Payment } from '../../payment/entities/payment.entity';
+import { User } from '../../users/entities/user.entity';
 import {
   Column,
   CreateDateColumn,
@@ -17,39 +17,39 @@ import { OrderItem } from './order-item.entity';
 @Entity()
 export class Order {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id!: string;
 
   @Column({
     type: 'enum',
     enum: OrderStatus,
     default: OrderStatus.INITIATED,
   })
-  status: OrderStatus;
+  status!: OrderStatus;
 
   @Column()
-  totalAmount: number;
+  totalAmount!: number;
 
   @Column({
     type: 'text',
   })
-  shippingAddress: string;
+  shippingAddress!: string;
 
   @Column({ type: 'text', nullable: true })
-  note: string | null;
+  note?: string | null;
 
   @ManyToOne(() => User, (user) => user.orders, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
-  user: User;
+  user!: User;
 
   @OneToOne(() => Payment, (payment) => payment.order, { cascade: true })
-  payment: Payment;
+  payment!: Payment;
 
   @OneToMany(() => OrderItem, (item) => item.order, { cascade: true })
-  items: OrderItem[];
+  items!: OrderItem[];
 
   @CreateDateColumn()
-  createdAt: Date;
+  createdAt!: Date;
 
   @UpdateDateColumn()
-  updatedAt: Date;
+  updatedAt!: Date;
 }

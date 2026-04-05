@@ -3,15 +3,15 @@ import { OrderService } from './order.service';
 import { OrderController } from './order.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Order } from './entities/order.entity';
-import { User } from 'src/users/entities/user.entity';
-import { Payment } from 'src/payment/entities/payment.entity';
-import { Product } from 'src/products/entities/product.entity';
+import { User } from '../users/entities/user.entity';
+import { Payment } from '../payment/entities/payment.entity';
+import { Product } from '../products/entities/product.entity';
 import { OrderItem } from './entities/order-item.entity';
-import { Profile } from 'src/profile/entities/profile.entity';
-import { PaymentModule } from 'src/payment/payment.module';
-import { ProfileModule } from 'src/profile/profile.module';
-import { CartModule } from 'src/cart/cart.module';
-import { ProductsModule } from 'src/products/products.module';
+import { Profile } from '../profile/entities/profile.entity';
+import { PaymentModule } from '../payment/payment.module';
+import { ProfileModule } from '../profile/profile.module';
+import { CartModule } from '../cart/cart.module';
+import { ProductsModule } from '../products/products.module';
 
 @Module({
   imports: [

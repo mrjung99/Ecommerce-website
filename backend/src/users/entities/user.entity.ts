@@ -1,7 +1,7 @@
-import { Role } from 'src/auth/enum/role.enum';
-import { Cart } from 'src/cart/entities/cart.entity';
-import { Order } from 'src/order/entities/order.entity';
-import { Profile } from 'src/profile/entities/profile.entity';
+import { Role } from '../../auth/enum/role.enum';
+import { Cart } from '../../cart/entities/cart.entity';
+import { Order } from '../../order/entities/order.entity';
+import { Profile } from '../../profile/entities/profile.entity';
 import {
   Column,
   Entity,
@@ -14,20 +14,20 @@ import {
 @Entity()
 export class User {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id!: string;
 
   @Column({
     type: 'varchar',
     unique: true,
     nullable: false,
   })
-  email: string;
+  email?: string;
 
   @Column({
     type: 'varchar',
     nullable: false,
   })
-  password: string;
+  password?: string;
 
   @Column({
     type: 'enum',
@@ -35,24 +35,24 @@ export class User {
     enumName: 'user_role',
     default: Role.USER,
   })
-  role: Role;
+  role!: Role;
 
   @Column({
     type: 'text',
     nullable: true,
   })
-  hashedRefreshToken: string;
+  hashedRefreshToken?: string;
 
   @OneToOne(() => Profile, (profile) => profile.user, {
     eager: true,
     cascade: true,
   })
   @JoinColumn()
-  profile: Profile;
+  profile!: Profile;
 
   @OneToOne(() => Cart, (cart) => cart.user, { cascade: true })
-  cart: Cart;
+  cart!: Cart;
 
   @OneToMany(() => Order, (order) => order.user)
-  orders: Order[];
+  orders!: Order[];
 }

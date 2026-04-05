@@ -9,13 +9,13 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import { Between, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 import { Product } from './entities/product.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { PaginationDto } from 'src/common/pagination/dto/pagination-query.dto';
-import { PaginationProvider } from 'src/common/pagination/pagination.provider';
-import { Paginated } from 'src/common/pagination/pagination.interface';
-import { ImageUploadService } from 'src/image-upload/image-upload.service';
+import { PaginationDto } from '../common/pagination/dto/pagination-query.dto';
+import { PaginationProvider } from '../common/pagination/pagination.provider';
+import { Paginated } from '../common/pagination/pagination.interface';
+import { ImageUploadService } from '../image-upload/image-upload.service';
 import { ProductImage } from './entities/product-image.entity';
 import { FilterProductDto } from './dto/filter-product.dto';
-import { ProductCategory } from 'src/product-category/entities/product-category.entity';
+import { ProductCategory } from '../product-category/entities/product-category.entity';
 
 @Injectable()
 export class ProductsService {
@@ -37,11 +37,6 @@ export class ProductsService {
     files: Express.Multer.File[],
   ) {
     try {
-      const images = await this.imageUploadService.uploadMultipleImage(
-        files,
-        'products',
-      );
-
       const category = await this.categoryRepo.findOne({
         where: { id: createProductDto.categoryId },
         relations: ['children'],
@@ -58,6 +53,11 @@ export class ProductsService {
         );
       }
 
+      const images = await this.imageUploadService.uploadMultipleImage(
+        files,
+        'products',
+      );
+
       const product = this.productRepo.create({
         ...createProductDto,
         images,
@@ -67,7 +67,7 @@ export class ProductsService {
     } catch (error) {
       if (error) {
         console.log('UPLOAD ERROR', error);
-        throw new Error();
+        throw error;
       }
     }
   }

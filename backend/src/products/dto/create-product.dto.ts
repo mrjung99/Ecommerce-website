@@ -4,27 +4,27 @@ import { IsInt, IsNotEmpty, IsNumber, IsString } from 'class-validator';
 export class CreateProductDto {
   @IsNotEmpty()
   @IsString()
-  name: string;
+  name!: string;
 
   @IsNotEmpty()
   @IsString()
-  description: string;
+  description!: string;
 
   @IsNotEmpty()
   @IsString()
-  brand: string;
+  brand!: string;
 
   @IsNotEmpty()
   @IsString()
-  categoryId: string;
+  categoryId!: string;
 
   @IsInt()
   @IsNotEmpty()
   @Type(() => Number)
-  stock: number;
+  stock!: number;
 
   @IsNotEmpty()
   @IsNumber()
   @Type(() => Number)
-  price: number;
+  price!: number;
 }

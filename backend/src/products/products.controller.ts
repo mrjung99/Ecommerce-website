@@ -19,15 +19,14 @@ import {
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { PaginationDto } from 'src/common/pagination/dto/pagination-query.dto';
-import { Roles } from 'src/auth/decorator/roles.decorator';
-import { Role } from 'src/auth/enum/role.enum';
-import RolesGuard from 'src/auth/guard/roles.guard';
-import { Public } from 'src/auth/decorator/public.decorator';
+import { PaginationDto } from '../common/pagination/dto/pagination-query.dto';
+import { Roles } from '../auth/decorator/roles.decorator';
+import { Role } from '../auth/enum/role.enum';
+import RolesGuard from '../auth/guard/roles.guard';
+import { Public } from '../auth/decorator/public.decorator';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { FilterProductDto } from './dto/filter-product.dto';
 import { SkipThrottle } from '@nestjs/throttler';
-
 @Controller('products')
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
@@ -49,14 +48,12 @@ export class ProductsController {
     )
     files: Express.Multer.File[],
   ) {
-    const product = await this.productsService.create(createProductDto, files);
+    await this.productsService.create(createProductDto, files);
 
-    if (product) {
-      return {
-        status: 'success',
-        message: 'Product added successfully!!',
-      };
-    }
+    return {
+      status: 'success',
+      message: 'Product added successfully!!',
+    };
   }
 
   //* ------------------------ UPDATE PRODUCT -------------------

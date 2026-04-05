@@ -4,25 +4,25 @@ import { Product } from './product.entity';
 @Entity()
 export class ProductImage {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id!: string;
 
   @Column()
-  publicId: string;
+  publicId!: string;
 
   @Column()
-  originalUrl: string;
+  originalUrl!: string;
 
   @Column()
-  thumbnail: string;
+  thumbnail!: string;
 
   @Column()
-  medium: string;
+  medium!: string;
 
   @Column()
-  large: string;
+  large!: string;
 
   @ManyToOne(() => Product, (product) => product.images, {
     onDelete: 'CASCADE',
   })
-  product: Product;
+  product!: Product;
 }

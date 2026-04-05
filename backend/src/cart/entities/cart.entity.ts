@@ -1,4 +1,4 @@
-import { User } from 'src/users/entities/user.entity';
+import { User } from '../../users/entities/user.entity';
 import {
   CreateDateColumn,
   Entity,
@@ -13,18 +13,18 @@ import { CartItem } from './cart-item.entity';
 @Entity()
 export class Cart {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id!: string;
 
   @OneToOne(() => User, (user) => user.cart, { onDelete: 'CASCADE' })
   @JoinColumn()
-  user: User;
+  user!: User;
 
   @OneToMany(() => CartItem, (item) => item.cart, { cascade: true })
-  items: CartItem[];
+  items!: CartItem[];
 
   @CreateDateColumn()
-  createdAt: Date;
+  createdAt!: Date;
 
   @UpdateDateColumn()
-  updatedAt: Date;
+  updatedAt!: Date;
 }

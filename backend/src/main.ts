@@ -1,8 +1,8 @@
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
+import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -17,6 +17,9 @@ async function bootstrap() {
     }),
   );
 
+  // versioning
+  app.setGlobalPrefix('api/v1');
+
   // cookie
   app.use(cookieParser());
 
@@ -26,7 +29,9 @@ async function bootstrap() {
   //HELMET
   app.use(helmet());
 
-  await app.listen(process.env.PORT ?? 3000);
+  const port = process.env.PORT ?? 3000;
+  await app.listen(port);
+  console.log(`Application running on port: ${port}`);
 }
 
 bootstrap().catch((err) => {

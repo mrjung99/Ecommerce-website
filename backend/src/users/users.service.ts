@@ -1,7 +1,5 @@
 import {
   BadRequestException,
-  forwardRef,
-  Inject,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -10,8 +8,7 @@ import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as argon2 from 'argon2';
-import { ProfileService } from 'src/profile/profile.service';
-import { Profile } from 'src/profile/entities/profile.entity';
+import { Profile } from '../profile/entities/profile.entity';
 
 @Injectable()
 export class UsersService {
@@ -35,7 +32,7 @@ export class UsersService {
 
       await this.userRepo.save(user);
       return true;
-    } catch (error) {
+    } catch (error:any) {
       if (error.code === '23505') {
         if (error.detail.includes('email')) {
           throw new BadRequestException({

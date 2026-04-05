@@ -7,37 +7,37 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { ProductImage } from './product-image.entity';
-import { ProductCategory } from 'src/product-category/entities/product-category.entity';
-import { CartItem } from 'src/cart/entities/cart-item.entity';
+import { ProductCategory } from '../../product-category/entities/product-category.entity';
+import { CartItem } from '../../cart/entities/cart-item.entity';
 
 @Entity()
 export class Product {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id!: string;
 
   @Column({
     type: 'varchar',
     nullable: false,
   })
-  name: string;
+  name!: string;
 
   @Column({
     type: 'text',
     nullable: false,
   })
-  description: string;
+  description!: string;
 
   @Column({
     type: 'varchar',
   })
-  brand: string;
+  brand!: string;
 
   @Column({
     type: 'int',
     nullable: false,
     default: 0,
   })
-  stock: number;
+  stock!: number;
 
   @Column({
     type: 'decimal',
@@ -45,17 +45,17 @@ export class Product {
     scale: 2,
     nullable: false,
   })
-  price: number;
+  price!: number;
 
   @ManyToOne(() => ProductCategory, (c) => c.products)
-  category: ProductCategory;
+  category!: ProductCategory;
 
   @OneToMany(() => ProductImage, (img) => img.product, {
     cascade: true,
     eager: true,
   })
-  images: ProductImage[];
+  images!: ProductImage[];
 
   @OneToMany(() => CartItem, (cartItem) => cartItem.product, { cascade: true })
-  cartItems: CartItem[];
+  cartItems!: CartItem[];
 }

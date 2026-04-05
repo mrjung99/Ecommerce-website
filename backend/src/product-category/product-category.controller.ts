@@ -10,9 +10,9 @@ import {
 } from '@nestjs/common';
 import { ProductCategoryService } from './product-category.service';
 import { CreateProductCategoryDto } from './dto/create-product-category.dto';
-import RolesGuard from 'src/auth/guard/roles.guard';
-import { Roles } from 'src/auth/decorator/roles.decorator';
-import { Role } from 'src/auth/enum/role.enum';
+import RolesGuard from '../auth/guard/roles.guard';
+import { Roles } from '../auth/decorator/roles.decorator';
+import { Role } from '../auth/enum/role.enum';
 
 @Controller('product-category')
 export class ProductCategoryController {

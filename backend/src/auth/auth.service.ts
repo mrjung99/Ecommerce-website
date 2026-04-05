@@ -1,6 +1,6 @@
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
-import { UsersService } from 'src/users/users.service';
-import { CreateUserDto } from 'src/users/dto/create-user.dto';
+import { UsersService } from '../users/users.service';
+import { CreateUserDto } from '../users/dto/create-user.dto';
 import type { ConfigType } from '@nestjs/config';
 import authConfig from './configuration/authConfig';
 import { JwtService } from '@nestjs/jwt';
@@ -28,7 +28,7 @@ export class AuthService {
   async validateUser(email: string, password: string) {
     const user = await this.userService.findUserByEmail(email);
 
-    if (!user) {
+    if (!user || !user.password) {
       throw new UnauthorizedException('Invalid credentials!!');
     }
 
@@ -57,7 +57,7 @@ export class AuthService {
       httpOnly: true,
       secure: true,
       sameSite: 'strict',
-      path: '/auth/refresh',
+      path: '/',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
@@ -81,7 +81,7 @@ export class AuthService {
   //* ------------------------ REFRESH TOKEN ----------------------
   async refreshToken(userId: string, reqRefreshToken: string, res: Response) {
     const user = await this.userService.findUserById(userId);
-    if (!user) {
+    if (!user || !user.hashedRefreshToken) {
       throw new UnauthorizedException();
     }
 
@@ -102,7 +102,7 @@ export class AuthService {
       httpOnly: true,
       secure: true,
       sameSite: 'strict',
-      path: '/auth/refresh',
+      path: '/',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 

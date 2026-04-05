@@ -1,5 +1,4 @@
-import { Cart } from 'src/cart/entities/cart.entity';
-import { Product } from 'src/products/entities/product.entity';
+import { Product } from '../../products/entities/product.entity';
 import {
   Column,
   CreateDateColumn,
@@ -9,22 +8,23 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Cart } from './cart.entity';
 
 @Entity()
 export class CartItem {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id!: string;
 
   @ManyToOne(() => Cart, (cart) => cart.items, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'cart_id' })
-  cart: Cart;
+  cart!: Cart;
 
   @ManyToOne(() => Product, { eager: true, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'product_id' })
-  product: Product;
+  product!: Product;
 
   @Column({ type: 'int', default: 1 })
-  quantity: number;
+  quantity!: number;
 
   @Column({
     type: 'decimal',
@@ -33,11 +33,11 @@ export class CartItem {
     nullable: false,
     default: 0,
   })
-  snapshotPrice: number;
+  snapshotPrice?: number;
 
   @CreateDateColumn()
-  createdAt: Date;
+  createdAt!: Date;
 
   @UpdateDateColumn()
-  updatedAt: Date;
+  updatedAt!: Date;
 }

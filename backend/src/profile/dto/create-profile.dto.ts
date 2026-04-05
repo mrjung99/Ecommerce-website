@@ -3,41 +3,41 @@ import { IsDate, IsOptional, IsString } from 'class-validator';
 export class CreateProfileDto {
   @IsString()
   @IsOptional()
-  firstName: string;
+  firstName?: string;
 
   @IsString()
   @IsOptional()
-  lastName: string;
+  lastName?: string;
 
   @IsDate()
   @IsOptional()
-  dateOfBirth: Date;
+  dateOfBirth?: Date;
 
   @IsString()
   @IsOptional()
-  gender: string;
+  gender?: string;
 
   @IsString()
   @IsOptional()
-  contact: string;
+  contact?: string;
 
   @IsString()
   @IsOptional()
-  country: string;
+  country?: string;
 
   @IsString()
   @IsOptional()
-  state: string;
+  state?: string;
 
   @IsString()
   @IsOptional()
-  district: string;
+  district?: string;
 
   @IsString()
   @IsOptional()
-  city: string;
+  city?: string;
 
   @IsString()
   @IsOptional()
-  zipcode: string;
+  zipcode?: string;
 }

@@ -1,10 +1,10 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { ProductCategoryService } from './product-category.service';
 import { ProductCategoryController } from './product-category.controller';
-import { ProductsModule } from 'src/products/products.module';
+import { ProductsModule } from '../products/products.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ProductCategory } from './entities/product-category.entity';
-import { Product } from 'src/products/entities/product.entity';
+import { Product } from '../products/entities/product.entity';
 
 @Module({
   imports: [

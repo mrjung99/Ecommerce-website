@@ -1,9 +1,9 @@
 import { IsEnum, IsOptional, IsString } from 'class-validator';
-import { PaymentMethod } from 'src/common/enum/payment-method.enum';
+import { PaymentMethod } from '../../common/enum/payment-method.enum';
 
 export class CreateOrderDto {
   @IsEnum(PaymentMethod)
-  paymentMethod: PaymentMethod;
+  paymentMethod!: PaymentMethod;
 
   @IsOptional()
   @IsString()

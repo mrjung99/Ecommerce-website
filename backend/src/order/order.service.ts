@@ -7,17 +7,17 @@ import { Repository } from 'typeorm';
 import { Order } from './entities/order.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { OrderItem } from './entities/order-item.entity';
-import { Payment } from 'src/payment/entities/payment.entity';
-import { PaymentProvider } from 'src/payment/payment.provider';
-import { Profile } from 'src/profile/entities/profile.entity';
-import { OrderStatus } from 'src/common/enum/order-status.enum';
-import { CartService } from 'src/cart/cart.service';
+import { Payment } from '../payment/entities/payment.entity';
+import { PaymentProvider } from '../payment/payment.provider';
+import { Profile } from '../profile/entities/profile.entity';
+import { OrderStatus } from '../common/enum/order-status.enum';
+import { CartService } from '../cart/cart.service';
 import { CreateOrderDto } from './dto/create-order.dto';
-import { PaymentMethod } from 'src/common/enum/payment-method.enum';
-import { PaymentStatus } from 'src/common/enum/payment.status';
-import { User } from 'src/users/entities/user.entity';
+import { PaymentMethod } from '../common/enum/payment-method.enum';
+import { PaymentStatus } from '../common/enum/payment.status';
+import { User } from '../users/entities/user.entity';
 import { UpdateStatusDto } from './dto/update-status.dto';
-import { Product } from 'src/products/entities/product.entity';
+import { Product } from '../products/entities/product.entity';
 import * as crypto from 'crypto';
 
 @Injectable()
@@ -230,7 +230,7 @@ export class OrderService {
         order.id,
         totalAmount,
         user.profile.firstName ?? 'customer',
-        user.email,
+        user.email!,
       );
 
       const payment = this.paymentRepo.create({
