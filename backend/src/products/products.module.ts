@@ -8,6 +8,7 @@ import { ImageUploadModule } from '../image-upload/image-upload.module';
 import { ProductImage } from './entities/product-image.entity';
 import { ProductCategoryModule } from '../product-category/product-category.module';
 import { ProductCategory } from '../product-category/entities/product-category.entity';
+import { CloudinaryModule } from '../cloudinary/cloudinary.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { ProductCategory } from '../product-category/entities/product-category.e
     TypeOrmModule.forFeature([Product, ProductImage, ProductCategory]),
     PaginationModule,
     ImageUploadModule,
+    CloudinaryModule
   ],
   controllers: [ProductsController],
   providers: [ProductsService],

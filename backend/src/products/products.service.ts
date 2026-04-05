@@ -16,6 +16,9 @@ import { ImageUploadService } from '../image-upload/image-upload.service';
 import { ProductImage } from './entities/product-image.entity';
 import { FilterProductDto } from './dto/filter-product.dto';
 import { ProductCategory } from '../product-category/entities/product-category.entity';
+import { object } from 'joi';
+import cloudinary from '../configuration/cloudinary.configuration';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
 
 @Injectable()
 export class ProductsService {
@@ -28,10 +31,90 @@ export class ProductsService {
     private readonly categoryRepo: Repository<ProductCategory>,
     private readonly paginationProvider: PaginationProvider,
     private readonly imageUploadService: ImageUploadService,
+    private readonly cloudinaryService: CloudinaryService,
   ) {}
+
   private readonly logger = new Logger(ProductsService.name);
 
-  //* ----------------------- ADD PRODUCT ---------------------
+  //! ======================== for direct upload to cloudinary ========================
+  //* ----------------------- CREATE PRODUCT --------------------------------
+  async createProduct(dto: CreateProductDto) {
+    const category = await this.categoryRepo.findOne({
+      where: { id: dto.categoryId },
+      relations: ['children'],
+    });
+
+    if (!category) {
+      throw new NotFoundException('Category not found!!');
+    }
+
+    if (category.children && category.children.length > 0) {
+      throw new BadRequestException(
+        'Cannot assign product to parent category.',
+      );
+    }
+
+    const images = await Promise.all(
+      dto.images.map((img) => this.productImageRepo.save(img)),
+    );
+
+    const product = this.productRepo.create({
+      ...dto,
+      category,
+      images,
+    });
+
+    return await this.productRepo.save(product);
+  }
+
+  //* ----------------------------------- UPDATE PRODUCT ------------------------------
+  async updateProduct(productId: string, dto: UpdateProductDto) {
+    const product = await this.productRepo.findOne({
+      where: { id: productId },
+      relations: ['images', 'category'],
+    });
+
+    if (!product) throw new NotFoundException('Product not found!!');
+
+    if (dto.categoryId) {
+      const category = await this.categoryRepo.findOne({
+        where: { id: dto.categoryId },
+        relations: ['children'],
+      });
+
+      if (!category) throw new NotFoundException('Category not found!');
+      if (category.children && category.children.length > 0)
+        throw new BadRequestException(
+          'Cannot assign product to parent category.',
+        );
+
+      product.category = category;
+    }
+
+    if (dto.images && dto.images.length > 0) {
+      // delete all old image from cloudinary
+      await Promise.all(
+        product.images.map((img) =>
+          this.cloudinaryService.deleteImageFromCloudinary(img.publicId),
+        ),
+      );
+
+      // delete previous images from db
+      await this.productImageRepo.delete({ product: { id: productId } });
+
+      product.images = dto.images.map((img) =>
+        this.productImageRepo.create({ ...img, product }),
+      );
+    }
+
+    Object.assign(product, dto);
+    delete (product as any).images;
+    delete (product as any).category;
+    return await this.productRepo.save(product);
+  }
+
+  //! ======================== for our server upload ========================
+  //* ----------------------- ADD PRODUCT (for server) ---------------------
   async create(
     createProductDto: CreateProductDto,
     files: Express.Multer.File[],
@@ -128,6 +211,7 @@ export class ProductsService {
       throw new Error();
     }
   }
+  //! =======================================================================
 
   //* ----------------------- GET ALL PRODUCT ---------------------
   async getAllProduct(

@@ -29,19 +29,19 @@ export class ImageUploadService {
     file: Express.Multer.File,
     folder: string,
   ): Promise<UploadedImage> {
-    const compressedBuffer = this.compressImage(file.buffer);
+    // const compressedBuffer = this.compressImage(file.buffer);
 
-    // Upload when compression is ready (chaining, not waiting sequentially) called Promise Chaining + Parallel Asynchronous
-    const upload = compressedBuffer.then((buffer) =>
-      this.streamUpload(buffer, folder),
-    );
+    // // Upload when compression is ready (chaining, not waiting sequentially) called Promise Chaining + Parallel Asynchronous
+    // const upload = compressedBuffer.then((buffer) =>
+    //   this.streamUpload(buffer, folder),
+    // );
 
-    // wait for upload result only once
-    const result = await upload;
-    return this.buildImageUrls(result);
+    // // wait for upload result only once
+    // const result = await upload;
+    // return this.buildImageUrls(result);
 
-    //  const upload = await this.streamUpload(compressedBuffer, folder);
-    //  return this.buildImageUrls(upload);
+     const upload = await this.streamUpload(file.buffer, folder);
+     return this.buildImageUrls(upload);
   }
 
   //* ------------------ UPLOAD MULTIPLE IMAGE -------------------

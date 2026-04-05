@@ -1,5 +1,13 @@
 import { Type } from 'class-transformer';
-import { IsInt, IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import {
+  IsArray,
+  IsInt,
+  IsNotEmpty,
+  IsNumber,
+  IsString,
+  IsUUID,
+} from 'class-validator';
+import { ProductImageDto } from './product-image.dto';
 
 export class CreateProductDto {
   @IsNotEmpty()
@@ -15,7 +23,7 @@ export class CreateProductDto {
   brand!: string;
 
   @IsNotEmpty()
-  @IsString()
+  @IsUUID()
   categoryId!: string;
 
   @IsInt()
@@ -27,4 +35,7 @@ export class CreateProductDto {
   @IsNumber()
   @Type(() => Number)
   price!: number;
+
+  @IsArray()
+  images!: ProductImageDto[]; // while uploading file from our server to the cloudinary we do not need this field
 }

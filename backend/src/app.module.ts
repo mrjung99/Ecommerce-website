@@ -17,6 +17,7 @@ import { CartModule } from './cart/cart.module';
 import { OrderModule } from './order/order.module';
 import { PaymentModule } from './payment/payment.module';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import appConfiguration from './configuration/app.configuration';
 import envValidator from './configuration/validation.configuration';
 
@@ -58,6 +59,7 @@ import envValidator from './configuration/validation.configuration';
       { name: 'medium', ttl: 60000, limit: 50 },
       { name: 'long', ttl: 900000, limit: 200 },
     ]),
+    CloudinaryModule,
   ],
   controllers: [AppController],
   providers: [
