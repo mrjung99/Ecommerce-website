@@ -5,7 +5,6 @@ import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { ProductsModule } from './products/products.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { pgConfig } from './configuration/db.configuration';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { PaginationModule } from './common/pagination/pagination.module';
 import { ProfileModule } from './profile/profile.module';
@@ -20,9 +19,13 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import appConfiguration from './configuration/app.configuration';
 import envValidator from './configuration/validation.configuration';
+import { MailerModule } from '@nestjs-modules/mailer';
+import { join } from 'path';
+import { HandlebarsAdapter } from '@nestjs-modules/mailer/adapters/handlebars.adapter';
 
 @Module({
   imports: [
+    AuthModule,
     ConfigModule.forRoot({
       envFilePath: '.env',
       load: [appConfiguration],
@@ -43,9 +46,10 @@ import envValidator from './configuration/validation.configuration';
         database: configService.get('database.name'),
       }),
     }),
+
     //  TypeOrmModule.forRoot(pgConfig), // for neon connection
     UsersModule,
-    AuthModule,
+
     ProductsModule,
     PaginationModule,
     ProfileModule,
@@ -60,6 +64,27 @@ import envValidator from './configuration/validation.configuration';
       { name: 'long', ttl: 900000, limit: 200 },
     ]),
     CloudinaryModule,
+    MailerModule.forRoot({
+      transport: {
+        host: process.env.EMAIL_HOST,
+        port: Number(process.env.EMAIL_PORT),
+        secure: false,
+        auth: {
+          user: process.env.MAIL_USERNAME,
+          pass: process.env.EMAIL_PASSWORD,
+        },
+      },
+      defaults: {
+        from: '"Saja-store" <saja@info.com>',
+      },
+      template: {
+        dir: join(__dirname, 'mail/templates'),
+        adapter: new HandlebarsAdapter(),
+        options: {
+          strict: true,
+        },
+      },
+    }),
   ],
   controllers: [AppController],
   providers: [

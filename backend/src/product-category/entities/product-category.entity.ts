@@ -24,7 +24,7 @@ export class ProductCategory {
   slug!: string;
 
   @ManyToOne(() => ProductCategory, (c) => c.children, { nullable: true })
-  parent!: ProductCategory | null;
+  parent?: ProductCategory | null;
 
   @OneToMany(() => ProductCategory, (c) => c.parent)
   children!: ProductCategory[];

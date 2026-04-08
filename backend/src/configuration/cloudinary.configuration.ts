@@ -1,4 +1,3 @@
-import { NotFoundException } from '@nestjs/common';
 import { v2 as cloudinary } from 'cloudinary';
 import * as dotenv from 'dotenv';
 

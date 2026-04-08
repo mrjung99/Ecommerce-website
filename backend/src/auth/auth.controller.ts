@@ -16,6 +16,8 @@ import type { Response } from 'express';
 import { RefreshAuthGuard } from './guard/refresh.auth.guard';
 import { Public } from './decorator/public.decorator';
 import { Throttle } from '@nestjs/throttler';
+import type { RefreshRequest } from './interface/refresh-request.interface';
+import type { LoginRequest } from './interface/login-request.interface';
 
 @Controller('auth')
 export class AuthController {
@@ -29,7 +31,7 @@ export class AuthController {
     const createUser = await this.authService.createUser(createUserDto);
 
     if (createUser) {
-      return { status: 'success', message: 'User created successfully!!' };
+      return { success: true, message: 'User created successfully!!' };
     }
 
     throw new BadRequestException({
@@ -44,7 +46,10 @@ export class AuthController {
   @UseGuards(LocalAuthGuard)
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  async login(@Req() req: any, @Res({ passthrough: true }) res: Response) {
+  async login(
+    @Req() req: LoginRequest,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     const token = await this.authService.login(req.user.id, res);
 
     return { status: 'success', message: 'Login successful!!', token };
@@ -56,15 +61,30 @@ export class AuthController {
   @UseGuards(RefreshAuthGuard)
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
-  async refresh(@Req() req: any, @Res({ passthrough: true }) res: Response) {
+  async refresh(
+    @Req() req: RefreshRequest,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     const userId = req.user.id;
-    const refreshToken = req.cookies.refreshToken;
+    const refreshToken = req.user.refreshToken;
     const token = await this.authService.refreshToken(
       userId,
       refreshToken,
       res,
     );
 
-    return { status: 'success', token };
+    return { success: true, token };
+  }
+
+  //* -------------------- FORGOT PASSWORD ------------------
+  @Public()
+  @Post('forgot-password')
+  @HttpCode(HttpStatus.OK)
+  async forgotPassword(@Body('email') email: string) {
+    await this.authService.requestRestPassword(email);
+    return {
+      success: true,
+      message: 'Reset password link send.',
+    };
   }
 }

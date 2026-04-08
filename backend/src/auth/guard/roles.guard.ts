@@ -13,7 +13,7 @@ export default class RolesGuard implements CanActivate {
     ]);
 
     if (!requiredRoles) {
-      return true;
+      return true; // means the route handler or class is available for all(public)
     }
 
     const user = context.switchToHttp().getRequest().user;
@@ -21,6 +21,6 @@ export default class RolesGuard implements CanActivate {
     const hasRequiredRoles = requiredRoles.some((role) =>
       user.role.includes(role),
     );
-    return hasRequiredRoles;
+    return hasRequiredRoles; // if hasRequiredRoles return true then it will allow access if false deny
   }
 }

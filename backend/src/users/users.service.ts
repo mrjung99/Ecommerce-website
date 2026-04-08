@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -22,6 +23,15 @@ export class UsersService {
   //* ------------------CREATE USER --------------
   async createUser(createUserDto: CreateUserDto) {
     try {
+      // check user already exist or not
+      const userExist = await this.userRepo.findOne({
+        where: { email: createUserDto.email },
+      });
+
+      if (userExist) {
+        throw new ConflictException('User already exist with that email.');
+      }
+
       const profile = this.profileRepo.create(createUserDto.profile || {});
       const hashedPassword = await argon2.hash(createUserDto.password);
       const user = this.userRepo.create({
@@ -30,9 +40,8 @@ export class UsersService {
         profile,
       });
 
-      await this.userRepo.save(user);
-      return true;
-    } catch (error:any) {
+      return await this.userRepo.save(user);
+    } catch (error: any) {
       if (error.code === '23505') {
         if (error.detail.includes('email')) {
           throw new BadRequestException({

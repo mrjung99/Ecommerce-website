@@ -49,15 +49,15 @@ export class ProductCategoryService {
     return this.productCategoryRepo.save(category);
   }
 
-  //* ------------------------ GET ALL CATEGORY ---------------
+  //* ------------------------ GET ALL CATEGORY -----------------------------
   async getAll(): Promise<ProductCategory[]> {
     return await this.productCategoryRepo.find({
-      where: { id: IsNull() },
+      // where: { id: IsNull() },
       relations: ['children'],
     });
   }
 
-  //* ------------------------ GET ALL CATEGORY ---------------
+  //* ------------------------ GET ALL CATEGORY -------------------------
   async findOne(id: string) {
     const category = await this.productCategoryRepo.findOne({
       where: { id },
