@@ -47,6 +47,7 @@
     "passport-local": "^1.0.0",
     "pg": "^8.19.0",
     "reflect-metadata": "^0.2.2",
+    "resend": "^6.10.0",
     "rxjs": "^7.8.1",
     "sharp": "^0.34.5",
     "typeorm": "^0.3.28"
@@ -62,7 +63,8 @@
     "@types/express-serve-static-core": "^5.1.1",
     "@types/jest": "^30.0.0",
     "@types/multer": "^2.1.0",
-    "@types/node": "^22.10.7",
+    "@types/node": "^22.19.17",
+    "@types/passport": "^1.0.17",
     "@types/passport-jwt": "^4.0.1",
     "@types/passport-local": "^1.0.38",
     "@types/sharp": "^0.31.1",
@@ -79,7 +81,7 @@
     "ts-loader": "^9.5.2",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
-    "typescript": "5.9",
+    "typescript": "^6.0.2",
     "typescript-eslint": "^8.20.0"
   },
   "jest": {

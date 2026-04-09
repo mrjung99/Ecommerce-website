@@ -56,7 +56,10 @@ export class UsersService {
 
   //* ------------------ FIND USER BY EMAIL--------------
   async findUserByEmail(email: string) {
-    return await this.userRepo.findOneBy({ email });
+    return await this.userRepo.findOne({
+      where:{email}
+    })
+    
   }
 
   //* ------------------ FIND USER BY ID--------------

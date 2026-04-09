@@ -1,30 +1,24 @@
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  Index,
-  ManyToOne,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
-import { User } from './user.entity';
+import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+
 
 @Entity()
-export class PasswordReset {
-  @PrimaryGeneratedColumn('uuid')
-  id!: string;
+export class PasswordReset{
+   @PrimaryGeneratedColumn('uuid')
+   id!:string
 
-  @ManyToOne(() => User, (user) => user.passwordRestTokens, {
-    onDelete: 'CASCADE',
-  })
-  user!: User;
 
-  @Column()
-  @Index()
-  tokenHash!: string;
+   @Column()
+   userId!:string
+   
+   @Column()
+   tokenHash!:string
 
-  @Column({ type: 'timestamptz' })
-  expiresAt!: Date;
+   @Column({type:'timestamptz'})
+   expiresAt!:Date
 
-  @CreateDateColumn()
-  createdAt!: Date;
+   @Column()
+   isUsed!:boolean
+
+   @Column()
+   createdAt!:Date
 }

@@ -16,9 +16,8 @@ import { ImageUploadService } from '../image-upload/image-upload.service';
 import { ProductImage } from './entities/product-image.entity';
 import { FilterProductDto } from './dto/filter-product.dto';
 import { ProductCategory } from '../product-category/entities/product-category.entity';
-import { object } from 'joi';
-import cloudinary from '../configuration/cloudinary.configuration';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
+import { Multer } from 'multer';
 
 @Injectable()
 export class ProductsService {

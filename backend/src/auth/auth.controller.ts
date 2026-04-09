@@ -76,15 +76,15 @@ export class AuthController {
     return { success: true, token };
   }
 
-  //* -------------------- FORGOT PASSWORD ------------------
-  @Public()
-  @Post('forgot-password')
-  @HttpCode(HttpStatus.OK)
-  async forgotPassword(@Body('email') email: string) {
-    await this.authService.requestRestPassword(email);
-    return {
-      success: true,
-      message: 'Reset password link send.',
-    };
-  }
+  // //* -------------------- FORGOT PASSWORD ------------------
+  // @Public()
+  // @Post('forgot-password')
+  // @HttpCode(HttpStatus.OK)
+  // async forgotPassword(@Body('email') email: string) {
+  //   await this.authService.requestRestPassword(email);
+  //   return {
+  //     success: true,
+  //     message: 'Reset password link send.',
+  //   };
+  // }
 }

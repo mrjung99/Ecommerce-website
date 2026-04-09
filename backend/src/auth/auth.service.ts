@@ -6,13 +6,14 @@ import authConfig from './configuration/authConfig';
 import { JwtService } from '@nestjs/jwt';
 import refreshConfig from './configuration/refreshConfig';
 import * as argon2 from 'argon2';
-import type { Request, Response } from 'express';
+import {  type Request, type Response } from 'express';
+import crypto from 'crypto'
 import { Repository } from 'typeorm';
 import { PasswordReset } from '../users/entities/password-reset.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { MailService } from '../mail/mail.service';
-import crypto from 'crypto';
 import { REQUEST } from '@nestjs/core';
+import { MailService } from '../mail/mail.service';
+
 
 @Injectable()
 export class AuthService {
@@ -25,9 +26,9 @@ export class AuthService {
     private readonly jwtService: JwtService,
     @InjectRepository(PasswordReset)
     private readonly passwordResetRepo: Repository<PasswordReset>,
-    private readonly mailService: MailService,
     @Inject(REQUEST)
     private readonly request: Request,
+    private readonly mailService: MailService
   ) {}
 
   //* --------------- CREATE USER --------------
@@ -39,7 +40,7 @@ export class AuthService {
   async validateUser(email: string, password: string) {
     const user = await this.userService.findUserByEmail(email);
 
-    if (!user || !user.password) {
+    if (!user) {
       throw new UnauthorizedException('Invalid credentials!!');
     }
 
@@ -49,8 +50,12 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials!!');
     }
 
-    const { password: _, ...userWithoutPass } = user;
-    return userWithoutPass;
+    if (user && isPasswordMatched) {
+      const { password: _, ...userWithoutPass } = user;
+      return userWithoutPass;
+    }
+
+    return null;
   }
 
   //* --------------------- LOGIN ----------------
@@ -120,28 +125,28 @@ export class AuthService {
     return { accessToken };
   }
 
-  //* ---------------------------- FORGOT PASSWORD ------------------
-  async requestRestPassword(email: string) {
-    const user = await this.userService.findUserByEmail(email);
-    if (!user) return;
+   //* ---------------------------- FORGOT PASSWORD ------------------
+   async forgotPassword(email:string){
+    const user = await this.userService.findUserByEmail(email)
+    if(!user) return {message:'If user exists, password reset email will be sent.'}
 
-    const rawToken = crypto.randomBytes(32).toString('hex');
-    const tokenHash = crypto
-      .createHash('sha256')
-      .update(rawToken)
-      .digest('hex');
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+    const rawToken = crypto.randomBytes(32).toString('hex')
+
+    const tokenHash = crypto.createHash('sha256').update(rawToken).digest('hex')
+    const expiresAt = new Date(Date.now()+10*60*1000)
 
     const resetToken = this.passwordResetRepo.create({
-      user: { id: user.id },
+      userId: user.id,
       tokenHash,
       expiresAt,
-    });
-    await this.passwordResetRepo.save(resetToken);
+      isUsed:false
+    })
 
-    const resetUrl = `${this.request.protocol}://${this.request.headers.host}/avi/v1/reset-password?token=${rawToken}`;
+    await this.passwordResetRepo.save(resetToken)
 
-    await this.mailService.sendPasswordRest(user.email, resetUrl);
-    return;
-  }
+    const resetUrl = `${this.request.protocol}://${this.request.headers.host}/api/auth/reset-password?token=${rawToken}`
+
+    await this.mailService.sendPasswordReset(user.email,resetUrl)
+    return {message: 'Password reset email sent successfully.'}
+   }
 }

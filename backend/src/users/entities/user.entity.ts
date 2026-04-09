@@ -10,7 +10,6 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { PasswordReset } from './password-reset.entity';
 
 @Entity()
 export class User {
@@ -44,9 +43,7 @@ export class User {
   })
   hashedRefreshToken?: string;
 
-  @OneToMany(() => PasswordReset, (reset) => reset.user)
-  passwordRestTokens!: PasswordReset[];
-
+ 
   @OneToOne(() => Profile, (profile) => profile.user, {
     eager: true,
     cascade: true,

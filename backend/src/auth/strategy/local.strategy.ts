@@ -9,15 +9,19 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
   constructor(private readonly authService: AuthService) {
     super({ usernameField: 'email' });
     this.logger.log('LocalStrategy registered');
+      this.logger.log('Strategy name:', Strategy.name);
   }
 
   async validate(email: string, password: string) {
+        this.logger.log(`Validating user: ${email}`);
     const user = await this.authService.validateUser(email, password);
-
+    this.logger.log("LocalStrategy registered")
     if (!user) {
+       this.logger.warn(`Validation failed for: ${email}`);
       throw new UnauthorizedException();
     }
 
+     this.logger.log(`Validation successful for: ${email}`);
     return user;
   }
 }

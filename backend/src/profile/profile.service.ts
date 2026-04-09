@@ -18,8 +18,6 @@ export class ProfileService {
   constructor(
     @InjectRepository(Profile)
     private readonly profileRepo: Repository<Profile>,
-    @Inject(forwardRef(() => UsersService))
-    private readonly userService: UsersService,
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
     private readonly imageUploadService: ImageUploadService,
@@ -27,7 +25,9 @@ export class ProfileService {
 
   //* ------------------------- CREATE PROFILE -------------------
   async createProfile(userid: string, createProfileDto: CreateProfileDto) {
-    const user = await this.userService.findUserById(userid);
+    const user = await this.userRepo.findOne({
+      where:{id:userid}
+    });
     if (!user) {
       throw new NotFoundException('User not found!!');
     }
@@ -45,7 +45,9 @@ export class ProfileService {
     updateProfileDto: UpdateProfileDto,
     file?: Express.Multer.File,
   ) {
-    const user = await this.userService.findUserById(userId);
+    const user = await this.userRepo.findOne({
+      where:{id:userId}
+    });
     if (!user) {
       throw new NotFoundException('User not found!!');
     }

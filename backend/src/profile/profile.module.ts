@@ -10,10 +10,10 @@ import { ImageUploadModule } from '../image-upload/image-upload.module';
 @Module({
   imports: [
     TypeOrmModule.forFeature([Profile, User]),
-    forwardRef(() => UsersModule),
     ImageUploadModule,
   ],
   controllers: [ProfileController],
   providers: [ProfileService],
+  exports:[TypeOrmModule,ProfileService]
 })
 export class ProfileModule {}
