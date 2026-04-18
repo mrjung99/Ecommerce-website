@@ -11,7 +11,9 @@ import { UsersModule } from '../users/users.module';
 import { PassportModule } from '@nestjs/passport';
 import { LocalStrategy } from './strategy/local.strategy';
 import { MailModule } from '../mail/mail.module';
-
+import { OtpModule } from '../otp/otp.module';
+import { SessionModule } from '../session/session.module';
+import passwordResetConfig from './configuration/password-reset.config';
 
 @Module({
   imports: [
@@ -20,7 +22,11 @@ import { MailModule } from '../mail/mail.module';
     JwtModule.registerAsync(authConfig.asProvider()),
     ConfigModule.forFeature(authConfig),
     ConfigModule.forFeature(refreshConfig),
- MailModule
+    ConfigModule.forFeature(passwordResetConfig),
+    MailModule,
+    OtpModule,
+    SessionModule,
+    SessionModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, LocalStrategy, JwtStrategy, RefreshStrategy],

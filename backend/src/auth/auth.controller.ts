@@ -18,6 +18,7 @@ import { Public } from './decorator/public.decorator';
 import { Throttle } from '@nestjs/throttler';
 import type { RefreshRequest } from './interface/refresh-request.interface';
 import type { LoginRequest } from './interface/login-request.interface';
+import { LoginDto } from './dto/login.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -43,15 +44,14 @@ export class AuthController {
   //* --------------- LOGIN ---------------
   @Public()
   @Throttle({ short: { ttl: 60000, limit: 5 } })
-  @UseGuards(LocalAuthGuard)
   @Post('login')
   @HttpCode(HttpStatus.OK)
   async login(
-    @Req() req: LoginRequest,
+    @Req() req: any,
+    @Body() dto: LoginDto,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const token = await this.authService.login(req.user.id, res);
-
+    const token = await this.authService.login(req, dto, res);
     return { status: 'success', message: 'Login successful!!', token };
   }
 
@@ -66,9 +66,12 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ) {
     const userId = req.user.id;
+    const sessionId = req.user.sessionId;
     const refreshToken = req.user.refreshToken;
+
     const token = await this.authService.refreshToken(
       userId,
+      sessionId,
       refreshToken,
       res,
     );
@@ -77,14 +80,13 @@ export class AuthController {
   }
 
   // //* -------------------- FORGOT PASSWORD ------------------
-  // @Public()
-  // @Post('forgot-password')
-  // @HttpCode(HttpStatus.OK)
-  // async forgotPassword(@Body('email') email: string) {
-  //   await this.authService.requestRestPassword(email);
-  //   return {
-  //     success: true,
-  //     message: 'Reset password link send.',
-  //   };
-  // }
+  @Post()
+  async forgotPassword(@Body('email') email: string) {
+    const passwordResetToken = await this.authService.forgotPassword(email);
+
+    return {
+      success: true,
+      passwordResetToken,
+    };
+  }
 }

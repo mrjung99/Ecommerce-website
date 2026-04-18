@@ -20,7 +20,6 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
-    "@nestjs-modules/mailer": "^2.3.4",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.3",
     "@nestjs/core": "^11.0.1",
@@ -28,6 +27,7 @@
     "@nestjs/mapped-types": "*",
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.1.17",
+    "@nestjs/swagger": "^11.3.0",
     "@nestjs/throttler": "^6.5.0",
     "@nestjs/typeorm": "^11.0.0",
     "argon2": "^0.44.0",
@@ -39,7 +39,6 @@
     "handlebars": "^4.7.9",
     "helmet": "^8.1.0",
     "joi": "^18.1.2",
-    "multer": "^2.1.1",
     "multer-storage-cloudinary": "^4.0.0",
     "nodemailer": "^8.0.5",
     "passport": "^0.7.0",
@@ -47,9 +46,7 @@
     "passport-local": "^1.0.0",
     "pg": "^8.19.0",
     "reflect-metadata": "^0.2.2",
-    "resend": "^6.10.0",
     "rxjs": "^7.8.1",
-    "sharp": "^0.34.5",
     "typeorm": "^0.3.28"
   },
   "devDependencies": {
@@ -64,6 +61,7 @@
     "@types/jest": "^30.0.0",
     "@types/multer": "^2.1.0",
     "@types/node": "^22.19.17",
+    "@types/nodemailer": "^8.0.0",
     "@types/passport": "^1.0.17",
     "@types/passport-jwt": "^4.0.1",
     "@types/passport-local": "^1.0.38",

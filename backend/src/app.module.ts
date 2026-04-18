@@ -10,7 +10,6 @@ import { PaginationModule } from './common/pagination/pagination.module';
 import { ProfileModule } from './profile/profile.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/guard/jwt.auth.guard';
-import { ImageUploadModule } from './image-upload/image-upload.module';
 import { ProductCategoryModule } from './product-category/product-category.module';
 import { CartModule } from './cart/cart.module';
 import { OrderModule } from './order/order.module';
@@ -18,15 +17,17 @@ import { PaymentModule } from './payment/payment.module';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import appConfiguration from './configuration/app.configuration';
-import envValidator from './configuration/validation.configuration';
 import { MailModule } from './mail/mail.module';
-
+import { OtpModule } from './otp/otp.module';
+import { SessionModule } from './session/session.module';
+import mailConfiguration from './configuration/mail.configuration';
+import envValidator from './configuration/env.validator';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       envFilePath: '.env',
-      load: [appConfiguration],
+      load: [appConfiguration, mailConfiguration, mailConfiguration],
       validationSchema: envValidator,
       isGlobal: true,
     }),
@@ -44,16 +45,13 @@ import { MailModule } from './mail/mail.module';
         database: configService.get('database.name'),
       }),
     }),
-    
-    //  TypeOrmModule.forRoot(pgConfig), // for neon connection
+
     MailModule,
     ProfileModule,
     UsersModule,
     AuthModule,
-
     ProductsModule,
     PaginationModule,
-    ImageUploadModule,
     ProductCategoryModule,
     CartModule,
     OrderModule,
@@ -64,7 +62,8 @@ import { MailModule } from './mail/mail.module';
       { name: 'long', ttl: 900000, limit: 200 },
     ]),
     CloudinaryModule,
-   
+    OtpModule,
+    SessionModule,
   ],
   controllers: [AppController],
   providers: [

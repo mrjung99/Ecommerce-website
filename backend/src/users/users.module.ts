@@ -1,16 +1,20 @@
-import {  Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Profile } from '../profile/entities/profile.entity';
 import { PasswordReset } from './entities/password-reset.entity';
+import { MailModule } from '../mail/mail.module';
+import { OtpModule } from '../otp/otp.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Profile,PasswordReset]),
+    TypeOrmModule.forFeature([User, Profile, PasswordReset]),
+    MailModule,
+    OtpModule,
   ],
-  exports: [UsersService,TypeOrmModule],
+  exports: [UsersService, TypeOrmModule],
   controllers: [UsersController],
   providers: [UsersService],
 })

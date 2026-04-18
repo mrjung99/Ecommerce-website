@@ -5,15 +5,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Profile } from './entities/profile.entity';
 import { UsersModule } from '../users/users.module';
 import { User } from '../users/entities/user.entity';
-import { ImageUploadModule } from '../image-upload/image-upload.module';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Profile, User]),
-    ImageUploadModule,
-  ],
+  imports: [TypeOrmModule.forFeature([Profile, User])],
   controllers: [ProfileController],
   providers: [ProfileService],
-  exports:[TypeOrmModule,ProfileService]
+  exports: [TypeOrmModule, ProfileService],
 })
 export class ProfileModule {}

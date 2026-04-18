@@ -9,13 +9,6 @@ import {
   Delete,
   Query,
   UseGuards,
-  UseInterceptors,
-  UploadedFiles,
-  UploadedFile,
-  ParseFilePipe,
-  MaxFileSizeValidator,
-  FileTypeValidator,
-  Put,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -28,101 +21,43 @@ import { Public } from '../auth/decorator/public.decorator';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { FilterProductDto } from './dto/filter-product.dto';
 import { SkipThrottle } from '@nestjs/throttler';
+import { ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
 @Controller('products')
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
   //* -------------------- CREATE PRODUCT (DIRECT UPLOAD TO CLOUDINARY) -----------------
-  @Roles(Role.ADMIN,Role.MODERATOR)
+  @Roles(Role.ADMIN, Role.MODERATOR)
   @UseGuards(RolesGuard)
   @Post()
-  async createProduct(@Body() dto:CreateProductDto){
+  async createProduct(@Body() dto: CreateProductDto) {
     const product = await this.productsService.createProduct(dto);
     return {
       success: true,
       message: 'Product added successfully.',
-      product
-    }
-  }
-
-  //* -------------------- UPDATE PRODUCT (DIRECT UPLOAD TO CLOUDINARY) -----------------
-  @Roles(Role.ADMIN,Role.MODERATOR)
-  @UseGuards(RolesGuard)
-  @Patch(":id")
-  async update(@Param('id') id:string,@Body() dto:UpdateProductDto){
-    const productToUpdate = await this.productsService.updateProduct(id,dto)
-    return{
-      success: true,
-      message:'Product updated successfully.',
-      product: productToUpdate
-    }
-  }
-
-
-  //! ===================================== FOR SERVER UPLOAD TO CLOUDINARY ======================
-  //* ------------------- CREATE PRODUCT -------------------
-  @UseGuards(RolesGuard)
-  @Post('cloudinary')
-  @Roles(Role.ADMIN, Role.MODERATOR)
-  @UseInterceptors(FilesInterceptor('images', 5))
-  async addProduct(
-    @Body() createProductDto: CreateProductDto,
-    @UploadedFiles(
-      new ParseFilePipe({
-        validators: [
-          new MaxFileSizeValidator({ maxSize: 2 * 1024 * 1024 }), // 2MB
-          new FileTypeValidator({ fileType: 'image/(jpeg|png|webp)' }),
-        ],
-      }),
-    )
-    files: Express.Multer.File[],
-  ) {
-    await this.productsService.create(createProductDto, files);
-
-    return {
-      status: 'success',
-      message: 'Product added successfully!!',
+      product,
     };
   }
 
-  //* ------------------------ UPDATE PRODUCT -------------------
-  @UseGuards(RolesGuard)
-  @Patch('cloudinary/:id')
+  //* -------------------- UPDATE PRODUCT (DIRECT UPLOAD TO CLOUDINARY) -----------------
   @Roles(Role.ADMIN, Role.MODERATOR)
-  @UseInterceptors(FilesInterceptor('images', 5))
-  async updateProduct(
-    @Param('id') id: string,
-    @Body() updateProductDto: UpdateProductDto,
-    @UploadedFiles(
-      new ParseFilePipe({
-        validators: [
-          new MaxFileSizeValidator({ maxSize: 5 * 1024 * 1024 }),
-          new FileTypeValidator({ fileType: 'image/(jpeg|png|webp)' }),
-        ],
-        fileIsRequired: false,
-      }),
-    )
-    files?: Express.Multer.File[],
-  ) {
-    const updatedProduct = await this.productsService.update(
-      id,
-      updateProductDto,
-      files,
-    );
-
-    if (updatedProduct) {
-      return {
-        status: 'success',
-        message: 'Product updated successfully!!',
-      };
-    }
+  @UseGuards(RolesGuard)
+  @Patch(':id')
+  async update(@Param('id') id: string, @Body() dto: UpdateProductDto) {
+    const productToUpdate = await this.productsService.updateProduct(id, dto);
+    return {
+      success: true,
+      message: 'Product updated successfully.',
+      product: productToUpdate,
+    };
   }
-  //! ========================================================================================
 
   //* ------------------------ GET ALL PRODUCT -------------------
   @Public()
   @SkipThrottle()
   @Get()
+  @ApiOperation({ summary: 'Fetch all products.' })
+  @ApiResponse({ status: 200, description: 'Products fetched successfully.' })
   async getAllProducts(
     @Query() paginationDto: PaginationDto,
     @Query() filterProductDto: FilterProductDto,
@@ -149,19 +84,6 @@ export class ProductsController {
     return {
       status: 'success',
       data: product,
-    };
-  }
-
-  //* ----------------------- DELETE PRODUCT ---------------------
-  @UseGuards(RolesGuard)
-  @Delete(':id')
-  @Roles(Role.ADMIN, Role.MODERATOR)
-  async deleteProduct(@Param('id') id: string) {
-    const product = await this.productsService.deleteProduct(id);
-
-    return {
-      status: 'success',
-      message: `Product with the id: ${id}, has been deleted successfully!!`,
     };
   }
 }

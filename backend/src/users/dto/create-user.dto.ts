@@ -9,6 +9,10 @@ import {
 import { Profile } from '../../profile/entities/profile.entity';
 
 export class CreateUserDto {
+  @IsString()
+  @IsNotEmpty()
+  userName!: string;
+
   @IsEmail()
   @IsNotEmpty()
   email!: string;

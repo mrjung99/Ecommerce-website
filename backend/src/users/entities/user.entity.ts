@@ -6,15 +6,22 @@ import {
   Column,
   Entity,
   JoinColumn,
+  ManyToOne,
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { Status } from '../enum/userStatus.enum';
+import { Otp } from '../../otp/entity/otp.entity';
+import { Session } from '../../session/entities/session.entity';
 
 @Entity()
 export class User {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
+
+  @Column({ type: 'varchar', nullable: false })
+  userName!: string;
 
   @Column({
     type: 'varchar',
@@ -37,13 +44,15 @@ export class User {
   })
   role!: Role;
 
-  @Column({
-    type: 'text',
-    nullable: true,
-  })
-  hashedRefreshToken?: string;
+  @Column({ type: 'enum', enum: Status, default: Status.UNVERIFIED })
+  userStatus!: Status;
 
- 
+  @OneToMany(() => Otp, (otp) => otp.user)
+  otp!: Otp[];
+
+  @OneToMany(() => Session, (session) => session.user)
+  sessions!: Session[];
+
   @OneToOne(() => Profile, (profile) => profile.user, {
     eager: true,
     cascade: true,

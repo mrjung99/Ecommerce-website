@@ -12,12 +12,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { PaginationDto } from '../common/pagination/dto/pagination-query.dto';
 import { PaginationProvider } from '../common/pagination/pagination.provider';
 import { Paginated } from '../common/pagination/pagination.interface';
-import { ImageUploadService } from '../image-upload/image-upload.service';
 import { ProductImage } from './entities/product-image.entity';
 import { FilterProductDto } from './dto/filter-product.dto';
 import { ProductCategory } from '../product-category/entities/product-category.entity';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
-import { Multer } from 'multer';
 
 @Injectable()
 export class ProductsService {
@@ -29,7 +27,6 @@ export class ProductsService {
     @InjectRepository(ProductCategory)
     private readonly categoryRepo: Repository<ProductCategory>,
     private readonly paginationProvider: PaginationProvider,
-    private readonly imageUploadService: ImageUploadService,
     private readonly cloudinaryService: CloudinaryService,
   ) {}
 
@@ -66,7 +63,7 @@ export class ProductsService {
     return await this.productRepo.save(product);
   }
 
-  //* ----------------------------------- UPDATE PRODUCT ------------------------------
+  //* --------------------------- UPDATE PRODUCT ------------------------------
   async updateProduct(productId: string, dto: UpdateProductDto) {
     const product = await this.productRepo.findOne({
       where: { id: productId },
@@ -112,106 +109,6 @@ export class ProductsService {
     return await this.productRepo.save(product);
   }
 
-  //! ======================== for our server upload ========================
-  //* ----------------------- ADD PRODUCT (for server) ---------------------
-  async create(
-    createProductDto: CreateProductDto,
-    files: Express.Multer.File[],
-  ) {
-    try {
-      const category = await this.categoryRepo.findOne({
-        where: { id: createProductDto.categoryId },
-        relations: ['children'],
-      });
-
-      if (!category) {
-        throw new NotFoundException('Category not found');
-      }
-
-      // Prevent assigning product to parent category
-      if (category.children && category.children.length > 0) {
-        throw new BadRequestException(
-          'Cannot assign product to a parent category. Use a subcategory.',
-        );
-      }
-
-      const images = await this.imageUploadService.uploadMultipleImage(
-        files,
-        'products',
-      );
-
-      const product = this.productRepo.create({
-        ...createProductDto,
-        images,
-        category,
-      });
-      return await this.productRepo.save(product);
-    } catch (error) {
-      if (error) {
-        console.log('UPLOAD ERROR', error);
-        throw error;
-      }
-    }
-  }
-
-  //* ----------------------- UPDATE PRODUCT ---------------------
-  async update(
-    id: string,
-    dto: UpdateProductDto,
-    files?: Express.Multer.File[],
-  ) {
-    try {
-      const product = await this.productRepo.findOne({
-        where: { id },
-        relations: ['images', 'category'],
-      });
-      if (!product) throw new NotFoundException('Product not found');
-
-      if (dto.categoryId) {
-        const category = await this.categoryRepo.findOne({
-          where: { id: dto.categoryId },
-          relations: ['children'],
-        });
-
-        if (!category) {
-          throw new NotFoundException('Category not found!!');
-        }
-
-        // PREVENT ASSIGNING TO PARENT CATEGORY
-        if (category.children && category.children.length > 0) {
-          throw new BadRequestException(
-            'Can not assign product to a parent category. Use a subcategory.',
-          );
-        }
-
-        product.category = category;
-      }
-
-      Object.assign(product, dto);
-
-      if (files?.length) {
-        // delete old images
-        await Promise.all(
-          product.images.map((img) =>
-            this.imageUploadService.deleteImage(img.publicId),
-          ),
-        );
-
-        const uploadedImages =
-          await this.imageUploadService.uploadMultipleImage(files, 'products');
-
-        product.images = uploadedImages.map((img) =>
-          this.productImageRepo.create({ ...img, product }),
-        );
-      }
-      return this.productRepo.save(product);
-    } catch (error) {
-      console.log('UPLOAD ERROR', error);
-      throw new Error();
-    }
-  }
-  //! =======================================================================
-
   //* ----------------------- GET ALL PRODUCT ---------------------
   async getAllProduct(
     paginationDto: PaginationDto,
@@ -244,35 +141,5 @@ export class ProductsService {
   //* ----------------------- GET PRODUCT BY ID ---------------------
   async getProductById(productId: string) {
     return await this.productRepo.findOneBy({ id: productId });
-  }
-
-  //* ----------------------- DELETE PRODUCT ---------------------
-  async deleteProduct(productId: string) {
-    const product = await this.productRepo.findOne({
-      where: { id: productId },
-      relations: ['images'],
-    });
-
-    if (!product) {
-      throw new NotFoundException(
-        `Product with the id: ${productId} not found!!`,
-      );
-    }
-
-    // DELETE IMAGES FORM CLOUDINARY
-    if (product.images && product.images.length > 0) {
-      await Promise.all(
-        product.images.map((img) =>
-          this.imageUploadService.deleteImage(img.publicId),
-        ),
-      );
-    }
-
-    // DELETE IMAGE RECORDS FROM PRODUCT IMAGE TABLE
-    await this.productImageRepo.delete({
-      product: { id: productId },
-    });
-
-    return await this.productRepo.delete(productId);
   }
 }

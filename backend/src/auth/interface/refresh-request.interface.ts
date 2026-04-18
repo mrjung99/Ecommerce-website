@@ -4,5 +4,6 @@ export interface RefreshRequest extends Request {
     email: string;
     role: string;
     refreshToken: string;
+    sessionId: string;
   };
 }
