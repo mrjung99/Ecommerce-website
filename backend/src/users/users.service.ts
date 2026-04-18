@@ -184,6 +184,11 @@ export class UsersService {
     return user;
   }
 
+  //* ---------------- UPDATE RESET PASSWORD -----------------
+  async updateResetPass(userId: string, password: string) {
+    return await this.userRepo.update({ id: userId }, { password });
+  }
+
   //* ------------------ SAVE USER --------------
   async saveProfile(user: User) {
     return await this.userRepo.save(user);

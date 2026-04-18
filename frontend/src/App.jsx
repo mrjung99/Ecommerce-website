@@ -1,19 +1,37 @@
 import React from "react";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+
 import AddProduct from "./component/pages/AddProduct";
+import ResetPassword from "./component/pages/ResetPassword";
 
-const App = () => {
-  console.log(import.meta.env.VITE_ACCESS_TOKEN);
-  const timestamp = Math.round(new Date().getTime() / 1000);
-  console.log(timestamp);
-
+/* Home Page */
+const Home = () => {
   return (
-    <div>
-      <h1 className="text-4xl text-gray-800 text-center font-medium">
-        Sajha store
-      </h1>
-      <AddProduct />
+    <div className="text-center mt-10">
+      <h1 className="text-4xl font-bold text-gray-800">Sajha Store</h1>
+      <p className="mt-3 text-gray-500">Welcome to our store</p>
     </div>
   );
+};
+
+/* Router Config */
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <Home />,
+  },
+  {
+    path: "/add-product",
+    element: <AddProduct />,
+  },
+  {
+    path: "/reset-password",
+    element: <ResetPassword />,
+  },
+]);
+
+const App = () => {
+  return <RouterProvider router={router} />;
 };
 
 export default App;

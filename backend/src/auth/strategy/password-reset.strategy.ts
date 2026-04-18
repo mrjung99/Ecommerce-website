@@ -6,7 +6,10 @@ import passwordResetConfig from '../configuration/password-reset.config';
 import { UsersService } from '../../users/users.service';
 
 @Injectable()
-export class PasswordResetStrategy extends PassportStrategy(Strategy) {
+export class PasswordResetStrategy extends PassportStrategy(
+  Strategy,
+  'jwt-password-reset',
+) {
   constructor(
     @Inject(passwordResetConfig.KEY)
     private readonly resetPassConfig: ConfigType<typeof passwordResetConfig>,

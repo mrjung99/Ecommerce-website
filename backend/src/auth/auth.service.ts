@@ -13,7 +13,6 @@ import { JwtService } from '@nestjs/jwt';
 import refreshConfig from './configuration/refreshConfig';
 import * as argon2 from 'argon2';
 import { type Request, type Response } from 'express';
-import { REQUEST } from '@nestjs/core';
 import { MailService } from '../mail/mail.service';
 import { LoginDto } from './dto/login.dto';
 import { Status } from '../users/enum/userStatus.enum';
@@ -32,8 +31,6 @@ export class AuthService {
     @Inject(refreshConfig.KEY)
     private readonly refreshConfiguration: ConfigType<typeof refreshConfig>,
     private readonly jwtService: JwtService,
-    @Inject(REQUEST)
-    private readonly request: Request,
     private readonly mailService: MailService,
     private readonly otpService: OtpService,
     private readonly sessionService: SessionService,
@@ -206,12 +203,26 @@ export class AuthService {
     return 'Please check your email to reset your password.';
   }
 
+  //* ---------------- RESET PASSWORD -----------------
+  async resetPassword(userId: string, newPassword: string) {
+    const user = await this.userService.findUserById(userId);
+    if (!user) {
+      throw new UnauthorizedException();
+    }
+
+    const hashedPass = await argon2.hash(newPassword);
+
+    await this.userService.updateResetPass(userId, hashedPass);
+
+    return 'Password reset is successful.';
+  }
+
   //* ---------------- RESET HTML ---------------------
   passwordResetHtml(url: string, userName: string) {
     return `
-      <h3>Dear, ${userName}</h3>
-      <h4>Click the link below to reset your Password.</h4>
-      <p>Link: ${url}</p>
+      <h5>Dear, ${userName}</h5>
+      <p>Click the link below to reset your Password.</p>
+      <p>Click on this link: <a href="${url}">Link</a></p>
       <p>This link is only valid for 15 minutes.</p>
     `;
   }

@@ -14,6 +14,7 @@ import { MailModule } from '../mail/mail.module';
 import { OtpModule } from '../otp/otp.module';
 import { SessionModule } from '../session/session.module';
 import passwordResetConfig from './configuration/password-reset.config';
+import { PasswordResetStrategy } from './strategy/password-reset.strategy';
 
 @Module({
   imports: [
@@ -29,6 +30,12 @@ import passwordResetConfig from './configuration/password-reset.config';
     SessionModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, LocalStrategy, JwtStrategy, RefreshStrategy],
+  providers: [
+    AuthService,
+    LocalStrategy,
+    JwtStrategy,
+    RefreshStrategy,
+    PasswordResetStrategy,
+  ],
 })
 export class AuthModule {}

@@ -11,14 +11,13 @@ import {
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
-import { LocalAuthGuard } from './guard/local.auth.guard';
 import type { Response } from 'express';
 import { RefreshAuthGuard } from './guard/refresh.auth.guard';
 import { Public } from './decorator/public.decorator';
 import { Throttle } from '@nestjs/throttler';
 import type { RefreshRequest } from './interface/refresh-request.interface';
-import type { LoginRequest } from './interface/login-request.interface';
 import { LoginDto } from './dto/login.dto';
+import { PasswordResetGuard } from './guard/password-reset.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -80,13 +79,29 @@ export class AuthController {
   }
 
   // //* -------------------- FORGOT PASSWORD ------------------
-  @Post()
+  @Public()
+  @Post('forgot-password')
   async forgotPassword(@Body('email') email: string) {
     const passwordResetToken = await this.authService.forgotPassword(email);
 
     return {
       success: true,
       passwordResetToken,
+    };
+  }
+
+  //* ---------------- RESET PASSWORD ---------------
+  @Public()
+  @UseGuards(PasswordResetGuard)
+  @Post('reset-password')
+  async resetPassword(@Req() req: any, @Body('password') password: string) {
+    const message = await this.authService.resetPassword(
+      req.user.userId,
+      password,
+    );
+    return {
+      success: true,
+      message,
     };
   }
 }
