@@ -18,7 +18,6 @@ import { Roles } from '../auth/decorator/roles.decorator';
 import { Role } from '../auth/enum/role.enum';
 import RolesGuard from '../auth/guard/roles.guard';
 import { Public } from '../auth/decorator/public.decorator';
-import { FilesInterceptor } from '@nestjs/platform-express';
 import { FilterProductDto } from './dto/filter-product.dto';
 import { SkipThrottle } from '@nestjs/throttler';
 import { ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
@@ -56,8 +55,8 @@ export class ProductsController {
   @Public()
   @SkipThrottle()
   @Get()
-  @ApiOperation({ summary: 'Fetch all products.' })
-  @ApiResponse({ status: 200, description: 'Products fetched successfully.' })
+  // @ApiOperation({ summary: 'Fetch all products.' })
+  // @ApiResponse({ status: 200, description: 'Products fetched successfully.' })
   async getAllProducts(
     @Query() paginationDto: PaginationDto,
     @Query() filterProductDto: FilterProductDto,

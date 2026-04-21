@@ -22,7 +22,7 @@ export class Session {
   device?: string;
 
   @Column({ type: 'text', nullable: true })
-  hashedRefreshToken?: string;
+  hashedRefreshToken?: string | null;
 
   @Column({ default: true })
   isActive!: boolean;

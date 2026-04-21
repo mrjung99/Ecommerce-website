@@ -18,10 +18,14 @@ import { Throttle } from '@nestjs/throttler';
 import type { RefreshRequest } from './interface/refresh-request.interface';
 import { LoginDto } from './dto/login.dto';
 import { PasswordResetGuard } from './guard/password-reset.guard';
+import { SessionService } from '../session/session.service';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly sessionService: SessionService,
+  ) {}
 
   //* --------------- CREATE USER ---------------
   @Public()
@@ -102,6 +106,33 @@ export class AuthController {
     return {
       success: true,
       message,
+    };
+  }
+
+  //* ------------------- LOGOUT (SINGLE DEVICE) -----------------
+  @Post('logout')
+  @HttpCode(HttpStatus.OK)
+  async logout(@Req() req, @Res() res: Response) {
+    const sessionId = req.user.sessionId;
+    await this.sessionService.revokeSession(sessionId);
+    res.clearCookie('refreshToken');
+    return {
+      success: true,
+      message: 'Logged out success.',
+    };
+  }
+
+  //* ------------------ LOGOUT FROM ALL SESSION -------------
+  @Post('logout-all')
+  @HttpCode(HttpStatus.OK)
+  async logoutAll(@Req() req, @Res() res: Response) {
+    const userId = req.user.userId;
+    await this.sessionService.revokeAllSession(userId);
+    res.clearCookie('refreshToken');
+
+    return {
+      success: true,
+      message: 'Logged out from all device.',
     };
   }
 }

@@ -3,11 +3,6 @@ import * as dotenv from 'dotenv';
 
 dotenv.config();
 
-console.log('CLOUDINARY CONFIG:', {
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-});
-
 if (!process.env.CLOUDINARY_API_SECRET) {
   console.log('cloudinary secret key is not provided.');
 } else if (!process.env.CLOUDINARY_CLOUD_NAME) {

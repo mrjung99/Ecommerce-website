@@ -218,7 +218,7 @@ export class AuthService {
   }
 
   //* ---------------- RESET HTML ---------------------
-  passwordResetHtml(url: string, userName: string) {
+  private passwordResetHtml(url: string, userName: string) {
     return `
       <h5>Dear, ${userName}</h5>
       <p>Click the link below to reset your Password.</p>

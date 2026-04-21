@@ -17,7 +17,6 @@ export class PasswordResetStrategy extends PassportStrategy(
   ) {
     const secret = resetPassConfig.secret;
     if (!secret) throw new Error('JWT_RESET_PASS_SECRET is not defined.');
-
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       secretOrKey: secret,

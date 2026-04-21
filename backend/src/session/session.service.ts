@@ -4,6 +4,7 @@ import { Session } from './entities/session.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../users/entities/user.entity';
 import * as argon2 from 'argon2';
+import { string } from 'joi';
 
 @Injectable()
 export class SessionService {
@@ -50,5 +51,23 @@ export class SessionService {
       );
 
     return await argon2.verify(session.hashedRefreshToken, hashedRefreshToken);
+  }
+
+  //* -------------- REVOKE SESSION --------------
+  async revokeSession(sessionid: string) {
+    return await this.sessionRepo.update(sessionid, {
+      isActive: false,
+      hashedRefreshToken: null,
+    });
+  }
+
+  //* ---------------- REVOKE ALL SESSION -------------
+  async revokeAllSession(userId: string) {
+    return await this.sessionRepo
+      .createQueryBuilder()
+      .update(Session)
+      .set({ isActive: false, hashedRefreshToken: null })
+      .where('userId=:userid AND isActive=true', { userId })
+      .execute();
   }
 }
