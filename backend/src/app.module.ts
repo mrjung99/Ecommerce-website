@@ -22,12 +22,18 @@ import { OtpModule } from './otp/otp.module';
 import { SessionModule } from './session/session.module';
 import mailConfiguration from './configuration/mail.configuration';
 import envValidator from './configuration/env.validator';
+import googleOauthConfig from './configuration/google-oauth.config';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       envFilePath: '.env',
-      load: [appConfiguration, mailConfiguration, mailConfiguration],
+      load: [
+        appConfiguration,
+        mailConfiguration,
+        mailConfiguration,
+        googleOauthConfig,
+      ],
       validationSchema: envValidator,
       isGlobal: true,
     }),

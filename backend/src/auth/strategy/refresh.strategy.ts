@@ -27,7 +27,6 @@ export class RefreshStrategy extends PassportStrategy(Strategy, 'refresh-jwt') {
 
   async validate(req: Request, payload: JwtPayload) {
     const refreshToken = req.cookies.refreshToken;
-    console.log(refreshToken);
 
     if (!refreshToken) {
       throw new UnauthorizedException();

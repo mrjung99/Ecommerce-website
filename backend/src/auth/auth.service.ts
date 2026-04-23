@@ -21,6 +21,9 @@ import { SessionService } from '../session/session.service';
 import { User } from '../users/entities/user.entity';
 import passwordResetConfig from './configuration/password-reset.config';
 import { SendMailDto } from '../mail/dto/sendMail.dto';
+import { access } from 'fs';
+import { GoogleUser } from './interface/google-user.interface';
+import { Provider } from '../users/enum/provider.enum';
 
 @Injectable()
 export class AuthService {
@@ -38,38 +41,17 @@ export class AuthService {
     private readonly resetPassConfig: ConfigType<typeof passwordResetConfig>,
   ) {}
 
-  //* --------------- CREATE USER --------------
-  async createUser(createUserDto: CreateUserDto) {
-    return await this.userService.createUser(createUserDto);
-  }
-
-  //* --------------------- VALIDATE USER ----------------
-  async validateUser(email: string, password: string) {
-    const user = await this.userService.findUserByEmail(email);
-
-    if (!user) {
-      throw new UnauthorizedException('Invalid credentials!!');
-    }
-
-    const isPasswordMatched = await argon2.verify(user.password, password);
-
-    if (!isPasswordMatched) {
-      throw new UnauthorizedException('Invalid credentials!!');
-    }
-
-    if (user && isPasswordMatched) {
-      const { password: _, ...userWithoutPass } = user;
-      return userWithoutPass;
-    }
-
-    return null;
-  }
-
-  //* ------------------------- LOGIN --------------------------
+  //* ------------------------- LOGIN (LOCAL) --------------------------
   async login(req: Request, dto: LoginDto, res: Response) {
     const user = await this.userService.findUserForLogin(dto.login);
     if (!user) {
       throw new UnauthorizedException('Invalid credentials.');
+    }
+
+    if (!user.password) {
+      throw new UnauthorizedException(
+        'This account uses Google login. Please set password first to login with email.',
+      );
     }
 
     if (user.userStatus === Status.UNVERIFIED) {
@@ -93,10 +75,48 @@ export class AuthService {
     if (!isValidPassword)
       throw new UnauthorizedException('Invalid credentials.');
 
-    // initialize session
+    return this.issueToken(user, req, res);
+  }
+
+  //* ------------------ LOGIN (GOOGLE) ----------------------
+  async googleLogin(
+    googleUser: {
+      email: string;
+      firstName: string;
+      lastName: string;
+      googleId: string;
+      avatarUrl: string;
+    },
+    req: Request,
+    res: Response,
+  ) {
+    let user = await this.userService.findUserByEmail(googleUser.email);
+
+    // FIRST LOGIN (if user not found it will register user)
+    if (!user) {
+      user = await this.userService.createGoogleUser(googleUser);
+    } else {
+      if (user.provider === 'local' && !user.googleId) {
+        user.provider = Provider.GOOGLE_LOCAL;
+        user.googleId = googleUser.googleId;
+
+        if (user.profile.avatarUrl == null) {
+          user.profile.avatarUrl = googleUser.avatarUrl;
+        }
+        await this.userService.saveUser(user);
+      }
+    }
+
+    const accessToken = await this.issueToken(user, req, res);
+
+    res.redirect(`http://localhost:5173/login?token=${accessToken}`);
+  }
+
+  //* ------------- ISSUE TOKEN (SET COOKIE, INITIATE SESSION, SAVE SESSION) ---------------
+  async issueToken(user: User, req: Request, res: Response) {
     const session = await this.sessionService.initiateSession(user, {
-      device: req.headers['user-agent'],
       ip: req.ip,
+      device: req.headers['user-agent'],
     });
 
     const { accessToken, refreshToken } = await this.generateToken(
@@ -106,18 +126,27 @@ export class AuthService {
 
     const hashedRefreshToken = await argon2.hash(refreshToken);
 
-    // save hashed refresh token
     await this.sessionService.saveHashedSession(session.id, hashedRefreshToken);
 
-    this.setCookie(refreshToken, res);
+    await this.setCookie(refreshToken, res);
 
-    return { accessToken };
+    return accessToken;
+  }
+
+  //* -------------- SET COOKIE -------------
+  async setCookie(refreshToken: string, res: Response) {
+    return res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: false,
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
   }
 
   //* ----------------------- GENERATE TOKEN -----------------------
   async generateToken(user: User, sessionId: string) {
-    const payload = { sub: user.id, email: user.email, role: user.role };
-    const refreshPayload = {
+    const payload = {
       sub: user.id,
       email: user.email,
       role: user.role,
@@ -126,7 +155,7 @@ export class AuthService {
 
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload, this.authConfiguration),
-      this.jwtService.signAsync(refreshPayload, this.refreshConfiguration),
+      this.jwtService.signAsync(payload, this.refreshConfiguration),
     ]);
 
     return {
@@ -165,18 +194,7 @@ export class AuthService {
 
     this.setCookie(refreshToken, res);
 
-    return { accessToken };
-  }
-
-  //* ------------ SET COOKIES FOR REFRESH TOKEN -------------
-  setCookie(refreshToken: string, res: Response) {
-    return res.cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'strict',
-      path: '/',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
+    return accessToken;
   }
 
   //* --------------------- FORGOT PASSWORD ------------------

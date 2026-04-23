@@ -8,6 +8,7 @@ import {
   HttpStatus,
   HttpCode,
   Res,
+  Get,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
@@ -19,6 +20,7 @@ import type { RefreshRequest } from './interface/refresh-request.interface';
 import { LoginDto } from './dto/login.dto';
 import { PasswordResetGuard } from './guard/password-reset.guard';
 import { SessionService } from '../session/session.service';
+import { GoogleAuthGuard } from './guard/google-oauth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -26,23 +28,6 @@ export class AuthController {
     private readonly authService: AuthService,
     private readonly sessionService: SessionService,
   ) {}
-
-  //* --------------- CREATE USER ---------------
-  @Public()
-  @Throttle({ short: { ttl: 3600000, limit: 3 } })
-  @Post('signup')
-  async createUser(@Body() createUserDto: CreateUserDto) {
-    const createUser = await this.authService.createUser(createUserDto);
-
-    if (createUser) {
-      return { success: true, message: 'User created successfully!!' };
-    }
-
-    throw new BadRequestException({
-      status: 'fail',
-      message: 'Something went wrong!!',
-    });
-  }
 
   //* --------------- LOGIN ---------------
   @Public()
@@ -56,6 +41,32 @@ export class AuthController {
   ) {
     const token = await this.authService.login(req, dto, res);
     return { status: 'success', message: 'Login successful!!', token };
+  }
+
+  //* ---------------- LOGIN WITH GOOGLE -----------
+  @Public()
+  @UseGuards(GoogleAuthGuard)
+  @Get('google/login')
+  async googleLogin() {}
+
+  //* ------------- GOOGLE LOGIN CALLBACK --------------
+  @Public()
+  @UseGuards(GoogleAuthGuard)
+  @Get('google/callback')
+  async googleCallback(@Req() req, @Res() res) {
+    const googleUser = req.user;
+
+    const accessToken = await this.authService.googleLogin(
+      googleUser,
+      req,
+      res,
+    );
+
+    return {
+      success: true,
+      message: 'Login successful.',
+      accessToken,
+    };
   }
 
   //* --------------- REFRESH ROUTE ---------------

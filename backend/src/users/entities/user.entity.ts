@@ -14,27 +14,27 @@ import {
 import { Status } from '../enum/userStatus.enum';
 import { Otp } from '../../otp/entity/otp.entity';
 import { Session } from '../../session/entities/session.entity';
+import { Provider } from '../enum/provider.enum';
 
 @Entity()
 export class User {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
-  @Column({ type: 'varchar', nullable: false })
+  @Column({ type: 'varchar', nullable: false, unique: true })
   userName!: string;
 
   @Column({
     type: 'varchar',
     unique: true,
-    nullable: false,
   })
   email!: string;
 
   @Column({
     type: 'varchar',
-    nullable: false,
+    nullable: true,
   })
-  password!: string;
+  password!: string | null;
 
   @Column({
     type: 'enum',
@@ -46,6 +46,12 @@ export class User {
 
   @Column({ type: 'enum', enum: Status, default: Status.UNVERIFIED })
   userStatus!: Status;
+
+  @Column({ type: 'enum', enum: Provider, default: Provider.LOCAL })
+  provider!: Provider;
+
+  @Column({ type: 'varchar', nullable: true })
+  googleId?: string;
 
   @OneToMany(() => Otp, (otp) => otp.user)
   otp!: Otp[];

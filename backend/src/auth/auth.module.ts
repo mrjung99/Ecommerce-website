@@ -9,12 +9,12 @@ import { JwtStrategy } from './strategy/jwt.strategy';
 import { RefreshStrategy } from './strategy/refresh.strategy';
 import { UsersModule } from '../users/users.module';
 import { PassportModule } from '@nestjs/passport';
-import { LocalStrategy } from './strategy/local.strategy';
 import { MailModule } from '../mail/mail.module';
 import { OtpModule } from '../otp/otp.module';
 import { SessionModule } from '../session/session.module';
 import passwordResetConfig from './configuration/password-reset.config';
 import { PasswordResetStrategy } from './strategy/password-reset.strategy';
+import { GoogleStrategy } from './strategy/goole-oauth.strategy';
 
 @Module({
   imports: [
@@ -32,10 +32,10 @@ import { PasswordResetStrategy } from './strategy/password-reset.strategy';
   controllers: [AuthController],
   providers: [
     AuthService,
-    LocalStrategy,
     JwtStrategy,
     RefreshStrategy,
     PasswordResetStrategy,
+    GoogleStrategy,
   ],
 })
 export class AuthModule {}

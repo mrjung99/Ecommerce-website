@@ -6,7 +6,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
-import { Repository } from 'typeorm';
+import { DeepPartial, Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as argon2 from 'argon2';
@@ -17,6 +17,7 @@ import crypto from 'crypto';
 import { OtpService } from '../otp/otp.service';
 import { VerifyUserDto } from './dto/verify-user.dto';
 import { Status } from './enum/userStatus.enum';
+import { Provider } from './enum/provider.enum';
 
 @Injectable()
 export class UsersService {
@@ -37,10 +38,6 @@ export class UsersService {
         where: { email: createUserDto.email },
       });
 
-      if (userExist) {
-        throw new ConflictException('User already exist with that email.');
-      }
-
       const profile = this.profileRepo.create(createUserDto.profile || {});
 
       const hashedPassword = await argon2.hash(createUserDto.password);
@@ -54,27 +51,36 @@ export class UsersService {
       const { expiresAt, otp } = this.generateOtp();
       const hashedOtp = await argon2.hash(otp);
 
+      const savedUser = await this.userRepo.save(user);
+
       await this.sendMailVerification(
         createUserDto.email,
         createUserDto.userName,
         otp,
       );
 
-      const savedUser = await this.userRepo.save(user);
-      console.log(savedUser);
-
       await this.otpService.saveOtpInfo(user, hashedOtp, expiresAt);
       return savedUser;
     } catch (error: any) {
       if (error.code === '23505') {
         if (error.detail.includes('email')) {
-          throw new BadRequestException({
+          throw new ConflictException({
             status: 'fail',
             field: 'email',
             message: 'User with this email already exist!!',
           });
         }
+
+        if (error.detail.includes('userName')) {
+          throw new ConflictException({
+            status: 'fail',
+            field: 'username',
+            message: 'User with this username already exist!!',
+          });
+        }
       }
+
+      throw error;
     }
   }
 
@@ -148,6 +154,31 @@ export class UsersService {
     return 'If email exist OTP code is sent to your account.';
   }
 
+  //* ------------ CREATE GOOGLE USER ----------
+  async createGoogleUser(data: {
+    email: string;
+    firstName: string;
+    lastName: string;
+    googleId: string;
+    avatarUrl: string;
+  }) {
+    const user = this.userRepo.create({
+      email: data.email,
+      userName: data.firstName + Math.floor(Math.random() * 9999),
+      password: null,
+      provider: Provider.GOOGLE,
+      userStatus: Status.VERIFIED,
+      googleId: data.googleId,
+      profile: {
+        firstName: data.firstName,
+        lastName: data.lastName,
+        avatarUrl: data.avatarUrl,
+      },
+    });
+
+    return await this.userRepo.save(user);
+  }
+
   //* ------------------ FIND USER BY EMAIL--------------
   async findUserByEmail(email: string) {
     return await this.userRepo.findOne({
@@ -190,7 +221,8 @@ export class UsersService {
   }
 
   //* ------------------ SAVE USER --------------
-  async saveProfile(user: User) {
-    return await this.userRepo.save(user);
+  async saveUser(user: DeepPartial<User>) {
+    const createUser = this.userRepo.create(user);
+    return await this.userRepo.save(createUser);
   }
 }
