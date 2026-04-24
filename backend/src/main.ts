@@ -36,7 +36,7 @@ async function bootstrap() {
   app.use(cookieParser());
 
   //CORS
-  app.enableCors({ origin: process.env.FRONTEND_URL, Credential: true });
+  app.enableCors({ origin: process.env.FRONTEND_URL, credentials: true });
 
   //HELMET
   app.use(helmet());

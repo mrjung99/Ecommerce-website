@@ -9,6 +9,7 @@ import {
   HttpCode,
   Res,
   Get,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
@@ -123,17 +124,23 @@ export class AuthController {
   //* ------------------- LOGOUT (SINGLE DEVICE) -----------------
   @Post('logout')
   @HttpCode(HttpStatus.OK)
-  async logout(@Req() req, @Res() res: Response) {
+  async logout(@Req() req, @Res({ passthrough: true }) res: Response) {
     const sessionId = req.user.sessionId;
+    if (!sessionId) {
+      throw new UnauthorizedException('No active session found.');
+    }
+
     await this.sessionService.revokeSession(sessionId);
     res.clearCookie('refreshToken');
+
     return {
       success: true,
-      message: 'Logged out success.',
+      message: 'Logged out successfully.',
     };
   }
 
   //* ------------------ LOGOUT FROM ALL SESSION -------------
+  @Public()
   @Post('logout-all')
   @HttpCode(HttpStatus.OK)
   async logoutAll(@Req() req, @Res() res: Response) {
