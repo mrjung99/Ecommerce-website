@@ -22,6 +22,7 @@ import { LoginDto } from './dto/login.dto';
 import { PasswordResetGuard } from './guard/password-reset.guard';
 import { SessionService } from '../session/session.service';
 import { GoogleAuthGuard } from './guard/google-oauth.guard';
+import { SetPasswordDto } from './dto/set-password.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -140,7 +141,6 @@ export class AuthController {
   }
 
   //* ------------------ LOGOUT FROM ALL SESSION -------------
-  @Public()
   @Post('logout-all')
   @HttpCode(HttpStatus.OK)
   async logoutAll(@Req() req, @Res() res: Response) {
@@ -151,6 +151,18 @@ export class AuthController {
     return {
       success: true,
       message: 'Logged out from all device.',
+    };
+  }
+
+  //* ------------- SET PASSWORD ---------------
+  @Post('set-password')
+  @HttpCode(HttpStatus.OK)
+  async setPassword(@Req() req, @Body() dto: SetPasswordDto) {
+    const res = await this.authService.setPassword(req.user.id, dto);
+
+    return {
+      success: true,
+      message: res,
     };
   }
 }

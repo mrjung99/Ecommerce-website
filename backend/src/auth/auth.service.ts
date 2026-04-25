@@ -24,6 +24,7 @@ import { SendMailDto } from '../mail/dto/sendMail.dto';
 import { access } from 'fs';
 import { GoogleUser } from './interface/google-user.interface';
 import { Provider } from '../users/enum/provider.enum';
+import { SetPasswordDto } from './dto/set-password.dto';
 
 @Injectable()
 export class AuthService {
@@ -48,7 +49,7 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials.');
     }
 
-    if (!user.password) {
+    if (!user.password || user.provider === Provider.GOOGLE) {
       throw new UnauthorizedException(
         'This account uses Google login. Please set password first to login with email.',
       );
@@ -254,5 +255,27 @@ export class AuthService {
     };
 
     await this.mailService.sendMail(dto);
+  }
+
+  //* ------------------- SET PASSWORD ----------------
+  async setPassword(userId: string, dto: SetPasswordDto) {
+    const user = await this.userService.findUserById(userId);
+    if (!user) {
+      throw new UnauthorizedException();
+    }
+
+    if (user.password) {
+      throw new BadRequestException('Password already exist');
+    }
+
+    user.password = await argon2.hash(dto.password);
+
+    if (user.provider === Provider.GOOGLE) {
+      user.provider = Provider.GOOGLE_LOCAL;
+    }
+
+    await this.userService.saveUser(user);
+
+    return 'Password set successfully.';
   }
 }
