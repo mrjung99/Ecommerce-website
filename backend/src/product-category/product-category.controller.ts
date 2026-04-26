@@ -13,6 +13,7 @@ import { CreateProductCategoryDto } from './dto/create-product-category.dto';
 import RolesGuard from '../auth/guard/roles.guard';
 import { Roles } from '../auth/decorator/roles.decorator';
 import { Role } from '../auth/enum/role.enum';
+import { Public } from '../auth/decorator/public.decorator';
 
 @Controller('product-category')
 export class ProductCategoryController {
@@ -34,8 +35,9 @@ export class ProductCategoryController {
   }
 
   //* ------------------------ GET ALL CATEGORY ---------------
-  @UseGuards(RolesGuard)
-  @Roles(Role.ADMIN, Role.MODERATOR)
+  // @UseGuards(RolesGuard)
+  // @Roles(Role.ADMIN, Role.MODERATOR)
+  @Public()
   @Get()
   async getAllCategory() {
     const categories = await this.productCategoryService.getAll();

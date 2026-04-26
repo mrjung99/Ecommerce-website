@@ -25,7 +25,7 @@ import { ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
-  //* -------------------- CREATE PRODUCT (DIRECT UPLOAD TO CLOUDINARY) -----------------
+  //* -------------------- CREATE PRODUCT -----------------
   @Roles(Role.ADMIN, Role.MODERATOR)
   @UseGuards(RolesGuard)
   @Post()
@@ -38,7 +38,7 @@ export class ProductsController {
     };
   }
 
-  //* -------------------- UPDATE PRODUCT (DIRECT UPLOAD TO CLOUDINARY) -----------------
+  //* -------------------- UPDATE PRODUCT -----------------
   @Roles(Role.ADMIN, Role.MODERATOR)
   @UseGuards(RolesGuard)
   @Patch(':id')

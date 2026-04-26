@@ -32,7 +32,6 @@ export class ProductsService {
 
   private readonly logger = new Logger(ProductsService.name);
 
-  //! ======================== for direct upload to cloudinary ========================
   //* ----------------------- CREATE PRODUCT --------------------------------
   async createProduct(dto: CreateProductDto) {
     const category = await this.categoryRepo.findOne({

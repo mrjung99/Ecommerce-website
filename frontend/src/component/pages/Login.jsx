@@ -5,6 +5,8 @@ import { NavLink, useLocation } from "react-router-dom";
 
 const Login = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [login, setLogin] = useState(null);
+  const [password, setPassword] = useState(null);
 
   const handleGoogleButton = () => {
     window.location.href = "http://localhost:3000/api/v1/auth/google/login";
@@ -62,6 +64,36 @@ const Login = () => {
     }
   }, []);
 
+  const handleLogin = async (e) => {
+    e.preventDefault();
+
+    try {
+      const res = await axios.post(
+        "http://localhost:3000/api/v1/auth/login",
+        {
+          login,
+          password,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          withCredentials: true,
+        },
+      );
+
+      alert(res.data.message);
+      setLogin("");
+      setPassword("");
+
+      setTimeout(() => {
+        window.location.href = "http://localhost:5173";
+      }, 200);
+    } catch (error) {
+      alert(error.response.data.message);
+    }
+  };
+
   return (
     <div className="min-h-[82vh] max-w-4/12 mx-auto py-10 flex items-center justify-center">
       <div className="bg-white shadow-[0_0_2px_rgba(0,0,0,0.3)] py-8 px-10 w-full">
@@ -75,13 +107,15 @@ const Login = () => {
                 Email/Username:
               </label>
               <input
-                type="email"
-                placeholder="Email..."
-                name="email"
-                id="email"
+                type="text"
+                placeholder="email/username..."
+                name="login"
+                id="login"
                 className="bg-gray-100 px-3 py-2 font-sans text-sm border
                             border-orange-600 focus:shadow-[inset_0_0_4px_rgba(249,115,22,0.4)]
                             rounded outline-0"
+                value={login}
+                onChange={(e) => setLogin(e.target.value)}
               />
             </div>
 
@@ -97,8 +131,8 @@ const Login = () => {
                   id="password"
                   className="w-full bg-gray-100 px-3 py-2 font-sans 
                   text-sm border border-orange-600 focus:shadow-[inset_0_0_4px_rgba(249,115,22,0.4)] rounded outline-0"
-                  // value={password}
-                  // onChange={(e) => setPassword(e.target.value)}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   autoComplete="off"
                 />
 
@@ -123,7 +157,7 @@ const Login = () => {
               className="bg-orange-600 hover:bg-orange-500 text-gray-100 
                         font-sans py-1 px-4 rounded cursor-pointer mt-2 w-full transition-all 
                         duration-300 ease"
-              // onClick={handleLogin}
+              onClick={handleLogin}
             >
               Log In
             </button>

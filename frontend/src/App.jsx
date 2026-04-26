@@ -9,8 +9,8 @@ import Login from "./component/pages/Login";
 const Home = () => {
   return (
     <div className="text-center mt-10">
-      <h1 className="text-4xl font-bold text-gray-800">Sajha Store</h1>
-      <p className="mt-3 text-gray-500">Welcome to our store</p>
+      <h1 className="text-4xl font-bold text-gray-800">Kinmel</h1>
+      <p className="mt-3 text-gray-500">Welcome to Kinmel</p>
     </div>
   );
 };
