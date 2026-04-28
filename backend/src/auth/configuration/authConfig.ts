@@ -5,6 +5,6 @@ export default registerAs(
   'auth',
   (): JwtSignOptions => ({
     secret: process.env.JWT_SECRET,
-    expiresIn: '5m',
+    expiresIn: '15m',
   }),
 );

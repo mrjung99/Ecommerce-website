@@ -29,6 +29,8 @@ export class ProductsController {
   @Roles(Role.ADMIN, Role.MODERATOR)
   @UseGuards(RolesGuard)
   @Post()
+  @ApiOperation({ summary: 'Create or add products.' })
+  @ApiResponse({ status: 201, description: 'Products added successfully.' })
   async createProduct(@Body() dto: CreateProductDto) {
     const product = await this.productsService.createProduct(dto);
     return {
@@ -42,6 +44,8 @@ export class ProductsController {
   @Roles(Role.ADMIN, Role.MODERATOR)
   @UseGuards(RolesGuard)
   @Patch(':id')
+  @ApiOperation({ summary: 'Update products.' })
+  @ApiResponse({ status: 200, description: 'Products updated successfully.' })
   async update(@Param('id') id: string, @Body() dto: UpdateProductDto) {
     const productToUpdate = await this.productsService.updateProduct(id, dto);
     return {
@@ -55,8 +59,8 @@ export class ProductsController {
   @Public()
   @SkipThrottle()
   @Get()
-  // @ApiOperation({ summary: 'Fetch all products.' })
-  // @ApiResponse({ status: 200, description: 'Products fetched successfully.' })
+  @ApiOperation({ summary: 'Fetch all products.' })
+  @ApiResponse({ status: 200, description: 'Products fetched successfully.' })
   async getAllProducts(
     @Query() paginationDto: PaginationDto,
     @Query() filterProductDto: FilterProductDto,
@@ -74,6 +78,8 @@ export class ProductsController {
 
   //* ----------------------- GET PRODUCT BY ID ---------------------
   @Get(':id')
+  @ApiOperation({ summary: 'Get product by id.' })
+  @ApiResponse({ status: 200, description: 'Product fetched successfully.' })
   async getProductById(@Param('id') id: string) {
     const product = await this.productsService.getProductById(id);
     if (!product) {

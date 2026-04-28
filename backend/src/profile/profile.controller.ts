@@ -1,6 +1,14 @@
 import { Controller, Post, Body, Patch, Req } from '@nestjs/common';
 import { ProfileService } from './profile.service';
 import { CreateProfileDto } from './dto/create-profile.dto';
+import {
+  ApiBadRequestResponse,
+  ApiBearerAuth,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
 
 @Controller('profile')
 export class ProfileController {
@@ -8,6 +16,12 @@ export class ProfileController {
 
   //* -------------------- CREATE PROFILE ------------------------
   @Post('create')
+  @ApiBearerAuth('accessToken')
+  @ApiOperation({ summary: 'Create profile' })
+  @ApiOkResponse({ description: 'Success' })
+  @ApiBadRequestResponse({ description: 'Bad request' })
+  @ApiNotFoundResponse({ description: ' not found.' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   async createProfile(
     @Body() createProfileDto: CreateProfileDto,
     @Req() req: any,
