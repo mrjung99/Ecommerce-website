@@ -62,9 +62,10 @@ export class User {
   @OneToOne(() => Profile, (profile) => profile.user, {
     eager: true,
     cascade: true,
+    onDelete: 'CASCADE',
   })
   @JoinColumn()
-  profile!: Profile;
+  profile?: Profile;
 
   @OneToOne(() => Cart, (cart) => cart.user, { cascade: true })
   cart!: Cart;

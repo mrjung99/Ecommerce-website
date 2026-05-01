@@ -68,7 +68,12 @@ export class CartController {
   @ApiNotFoundResponse({ description: 'Product not found.' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   async addItem(@Request() req, @Body() dto: AddToCartDto) {
-    return await this.cartService.addItem(req.user.id, dto);
+    const item = await this.cartService.addItem(req.user.id, dto);
+    return {
+      success: true,
+      message: 'Product added to cart successfully.',
+      item,
+    };
   }
 
   //* ------------------- UPDATE ITEM TO CART(QUANTITY) ---------------

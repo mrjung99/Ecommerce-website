@@ -38,7 +38,7 @@ export class OrderController {
   @ApiOperation({ summary: 'Checkout.' })
   @ApiResponse({ status: 200, description: 'Payment successful.' })
   checkout(@Request() req, @Body() dto: CreateOrderDto) {
-    return this.orderService.checkout(req.user.id, dto, req.user);
+    return this.orderService.checkout(req.user.id, dto);
   }
 
   //* ------------- PAYMENT CALLBACKS ------------------
@@ -50,7 +50,7 @@ export class OrderController {
 
   @Public()
   @Get('esewa/failure')
-  esewaFailure() {
+  esewaFailure(@Query() q) {
     return {
       success: false,
       message: 'Payment failed or was cancelled by user',

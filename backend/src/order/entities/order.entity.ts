@@ -29,6 +29,9 @@ export class Order {
   @Column()
   totalAmount!: number;
 
+  @Column({ type: 'varchar' })
+  phone!: string;
+
   @Column({
     type: 'text',
   })

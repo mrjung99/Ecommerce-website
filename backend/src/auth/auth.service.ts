@@ -6,7 +6,6 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
-import { CreateUserDto } from '../users/dto/create-user.dto';
 import type { ConfigType } from '@nestjs/config';
 import authConfig from './configuration/authConfig';
 import { JwtService } from '@nestjs/jwt';
@@ -21,10 +20,9 @@ import { SessionService } from '../session/session.service';
 import { User } from '../users/entities/user.entity';
 import passwordResetConfig from './configuration/password-reset.config';
 import { SendMailDto } from '../mail/dto/sendMail.dto';
-import { access } from 'fs';
-import { GoogleUser } from './interface/google-user.interface';
 import { Provider } from '../users/enum/provider.enum';
 import { SetPasswordDto } from './dto/set-password.dto';
+import { Profile } from '../profile/entities/profile.entity';
 
 @Injectable()
 export class AuthService {
@@ -101,7 +99,7 @@ export class AuthService {
         user.provider = Provider.GOOGLE_LOCAL;
         user.googleId = googleUser.googleId;
 
-        if (user.profile.avatarUrl == null) {
+        if (user.profile && user.profile.avatarUrl == null) {
           user.profile.avatarUrl = googleUser.avatarUrl;
         }
         await this.userService.saveUser(user);

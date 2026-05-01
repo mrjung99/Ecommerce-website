@@ -4,7 +4,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateOrderDto {
   @ApiProperty({
-    example: PaymentMethod.ESEWA,
+    example: PaymentMethod.KHALTI,
     enum: PaymentMethod,
     description: 'Payment gateway',
   })

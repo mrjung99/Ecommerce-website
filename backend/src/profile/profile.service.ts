@@ -38,7 +38,7 @@ export class ProfileService {
   }
 
   //* ------------------------- UPDATE PROFILE -------------------
-  async updateProfile(userId: string, updateProfileDto: UpdateProfileDto) {
+  async updateProfile(userId: string, dto: CreateProfileDto) {
     const user = await this.userRepo.findOne({
       where: { id: userId },
     });
@@ -47,13 +47,13 @@ export class ProfileService {
     }
 
     if (!user.profile) {
-      user.profile = this.profileRepo.create({});
-      await this.profileRepo.save(user.profile);
+      user.profile = this.profileRepo.create();
+      await this.userRepo.save(user);
     }
 
-    Object.assign(user.profile, updateProfileDto || {});
+    Object.assign(user.profile, dto);
 
-    await this.userRepo.save(user);
+    await this.profileRepo.save(user.profile);
     return user.profile;
   }
 

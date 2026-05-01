@@ -19,6 +19,8 @@ import { User } from '../users/entities/user.entity';
 import { UpdateStatusDto } from './dto/update-status.dto';
 import { Product } from '../products/entities/product.entity';
 import * as crypto from 'crypto';
+import { log } from 'console';
+import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class OrderService {
@@ -35,6 +37,7 @@ export class OrderService {
     private readonly productRepo: Repository<Product>,
     private readonly paymentProvider: PaymentProvider,
     private readonly cartService: CartService,
+    private readonly userService: UsersService,
   ) {}
 
   //* ---------------------- HELPER: resolve shipping address ------------------
@@ -49,21 +52,23 @@ export class OrderService {
       );
     }
 
-    if (!profile.city && !profile.district) {
+    if (!profile.city && !profile.district && !profile.contact) {
       throw new BadRequestException(
         'Your profile address is incomplete. Please update your shipping address.',
       );
     }
 
-    const parts = [
+    const shippingAddress = [
       profile.city,
       profile.district,
       profile.state,
       profile.country,
       profile.zipcode,
-    ].filter((part) => part && part.trim() !== '');
+    ]
+      .filter((part) => part && part.trim() !== '')
+      .join();
 
-    return parts.join(', ');
+    return shippingAddress;
   }
 
   //* ---------------------- HELPER: check valid status transaction ------------------
@@ -97,170 +102,202 @@ export class OrderService {
   }
 
   //* ---------------------- USER: checkout ------------------
-  async checkout(userId: string, dto: CreateOrderDto, user: User) {
-    // step 1 - get cart
+  async checkout(userId: string, dto: CreateOrderDto) {
+    const user = await this.userService.findUserById(userId);
+    if (!user) throw new NotFoundException('User not found.');
+
+    // STEP 1: Get cart
     const cart = await this.cartService.getOrCreateCart(userId);
 
-    if (cart.items.length === 0) {
+    if (!cart.items.length) {
       throw new BadRequestException('Your cart is empty.');
     }
 
-    // step 2 - check for unpaid existing order
+    // STEP 2: Check stock safely
+    for (const cartItem of cart.items) {
+      const product = await this.productRepo.findOne({
+        where: { id: cartItem.product.id },
+      });
+
+      if (!product || product.stock < cartItem.quantity) {
+        throw new BadRequestException(
+          `${cartItem.product.name} is out of stock.`,
+        );
+      }
+    }
+
+    // STEP 3: Check existing unpaid order
     const existingOrder = await this.orderRepo.findOne({
       where: {
         user: { id: userId },
         status: OrderStatus.INITIATED,
       },
       relations: ['payment', 'items'],
+      order: { createdAt: 'DESC' },
     });
 
     if (existingOrder) {
-      if (existingOrder?.payment.paymentMethod === PaymentMethod.ESEWA) {
-        const eSewaData = this.paymentProvider.initiateEsewaPayment(
-          existingOrder.id,
-          existingOrder.totalAmount,
-        );
+      const sameMethod =
+        existingOrder.payment.paymentMethod === dto.paymentMethod;
+      const isPending =
+        existingOrder.payment.status === PaymentStatus.INITIATED;
 
-        return {
-          orderId: existingOrder.id,
-          paymentMethod: 'esewa',
-          esewaPayload: eSewaData,
-          shippingAddress: existingOrder.shippingAddress,
-          totalAmount: existingOrder.totalAmount,
-          message: 'Resuming existing unpaid order',
-        };
+      if (sameMethod && isPending) {
+        return await this.resumePayment(existingOrder, user);
       }
+
+      existingOrder.status = OrderStatus.CANCELLED;
+
+      if (existingOrder.payment) {
+        existingOrder.payment.status = PaymentStatus.FAILED;
+        await this.paymentRepo.save(existingOrder.payment);
+      }
+
+      await this.orderRepo.save(existingOrder);
     }
 
-    //? step 3 - resolve shipping address
+    // STEP 4: Resolve shipping address
     const shippingAddress = await this.resolveShippingAddress(userId);
 
-    //? step 4 - check stock and decrement automatically for each cart item
-    for (const cartItem of cart.items) {
-      const { quantity } = cartItem;
-
-      // DECREMENT THE STOCK OF THE PRODUCT
-      await this.productRepo.decrement(
-        { id: cartItem.product.id },
-        'stock',
-        quantity,
-      );
-
-      // RE-FETCH TO CHECK THE STOCK AFTER DECREMENT
-      const updatedProduct = await this.productRepo.findOne({
-        where: { id: cartItem.product.id },
-      });
-
-      // WHILE DECREMENT IF THE STOCK WENT TO NEGATIVE RESTORE OUR DECREMENT TO THE ORIGINAL STOCK AND THROW ERROR
-      if (!updatedProduct || updatedProduct.stock < 0) {
-        await this.productRepo.increment(
-          { id: cartItem.product.id },
-          'stock',
-          quantity,
-        );
-        throw new BadRequestException(
-          `${cartItem.product.name} is out of stock. Please update your cart. Available stock is ${cartItem.product.stock}`,
-        );
-      }
-    }
-
-    //? step 5 - calculate total amount
+    // STEP 5: Calculate total
     const totalAmount = cart.items.reduce(
       (sum, item) => sum + Number(item.snapshotPrice) * item.quantity,
       0,
     );
 
-    //? step 6 - create order
+    // STEP 6: Create order
     const order = this.orderRepo.create({
       user: { id: userId } as any,
       totalAmount,
       shippingAddress,
       note: dto.note ?? null,
+      phone: user.profile?.contact,
       status: OrderStatus.INITIATED,
     });
+
     await this.orderRepo.save(order);
 
-    console.log(`Order created: ${order.id} for user: ${userId}`);
-
-    //? step 7 - save order items
+    // STEP 7: Save order items
     for (const cartItem of cart.items) {
       const orderItem = this.orderItemRepo.create({
         order,
         product: cartItem.product,
         productName: cartItem.product.name,
-        price: cartItem.product.price,
+        price: cartItem.snapshotPrice,
         quantity: cartItem.quantity,
       });
+
       await this.orderItemRepo.save(orderItem);
     }
 
-    //? step 8 - initiate payment
-    // --- eSewa
+    // STEP 8: Create payment
     if (dto.paymentMethod === PaymentMethod.ESEWA) {
-      const esewaData = this.paymentProvider.initiateEsewaPayment(
-        order.id,
-        totalAmount,
-      );
-
-      const payment = this.paymentRepo.create({
-        order,
-        paymentMethod: PaymentMethod.ESEWA,
-        status: PaymentStatus.INITIATED,
-        amount: totalAmount,
-      });
-      await this.paymentRepo.save(payment);
-
-      await this.cartService.clearCart(userId);
-
-      console.log(`eSewa payment initiated for order: ${order.id}`);
-
-      return {
-        orderId: order.id,
-        paymentMethod: 'eSewa',
-        esewaPayload: esewaData,
-        shippingAddress,
-        totalAmount,
-        // frontend: build a hidden form with esewaPayload fields
-        // and submit it to esewaPayload.payment_url
-      };
+      return await this.createEsewaPayment(order, totalAmount);
     }
 
     if (dto.paymentMethod === PaymentMethod.KHALTI) {
-      const khaltiData = await this.paymentProvider.initiateKhaltiPayment(
-        order.id,
-        totalAmount,
-        user.profile.firstName ?? 'customer',
-        user.email!,
-      );
-
-      const payment = this.paymentRepo.create({
-        order,
-        paymentMethod: PaymentMethod.KHALTI,
-        status: PaymentStatus.INITIATED,
-        amount: totalAmount,
-        pidx: khaltiData.pidx,
-      });
-      await this.paymentRepo.save(payment);
-
-      await this.cartService.clearCart(userId);
-
-      console.log(`Khalti payment initiated. pidx: ${khaltiData.pidx}`);
-
-      return {
-        orderId: order.id,
-        paymentMethod: PaymentMethod.KHALTI,
-        paymentUrl: khaltiData.payment_url,
-        shippingAddress,
-        totalAmount,
-        // frontend: redirect user to paymentUrl
-      };
+      return await this.createKhaltiPayment(order, totalAmount, user);
     }
 
     throw new BadRequestException('Invalid payment method.');
   }
 
+  //*----------- CREATE ESEWA PAYMENT -----------------
+  async createEsewaPayment(order: Order, totalAmount: number) {
+    const esewaPayload = this.paymentProvider.initiateEsewaPayment(
+      order.id,
+      totalAmount,
+    );
+
+    const payment = this.paymentRepo.create({
+      order,
+      paymentMethod: PaymentMethod.ESEWA,
+      status: PaymentStatus.INITIATED,
+      amount: totalAmount,
+    });
+
+    await this.paymentRepo.save(payment);
+    await this.cartService.clearCart(order.user.id);
+
+    return {
+      orderId: order.id,
+      paymentMethod: 'ESEWA',
+      esewaPayload,
+      shippingAddress: order.shippingAddress,
+      totalAmount,
+    };
+  }
+
+  //* ----------------- CREATE KHALTI PAYMENT --------------
+  async createKhaltiPayment(order: Order, totalAmount: number, user: User) {
+    const khaltiData = await this.paymentProvider.initiateKhaltiPayment(
+      order.id,
+      totalAmount,
+      user.userName,
+      user.email!,
+    );
+
+    const payment = this.paymentRepo.create({
+      order,
+      paymentMethod: PaymentMethod.KHALTI,
+      status: PaymentStatus.INITIATED,
+      amount: totalAmount,
+      pidx: khaltiData.pidx,
+    });
+
+    await this.paymentRepo.save(payment);
+    await this.cartService.clearCart(user.id);
+
+    return {
+      orderId: order.id,
+      paymentMethod: 'KHALTI',
+      paymentUrl: khaltiData.payment_url,
+      shippingAddress: order.shippingAddress,
+      totalAmount,
+    };
+  }
+
+  //* -------------------- RESUME PAYMENT -----------------
+  async resumePayment(order: Order, user: User) {
+    if (order.payment.paymentMethod === PaymentMethod.ESEWA) {
+      const esewaPayload = this.paymentProvider.initiateEsewaPayment(
+        order.id,
+        order.totalAmount,
+      );
+
+      return {
+        orderId: order.id,
+        PaymentMethod: 'ESEWA',
+        esewaPayload,
+        shippingAddress: order.shippingAddress,
+        totalAmount: order.totalAmount,
+        message: 'Resuming eSewa payment.',
+      };
+    }
+
+    if (order.payment.paymentMethod === PaymentMethod.KHALTI) {
+      const khaltiData = await this.paymentProvider.initiateKhaltiPayment(
+        order.id,
+        order.totalAmount,
+        user.userName,
+        user.email,
+      );
+
+      return {
+        orderId: order.id,
+        paymentMethod: 'KHALTI',
+        paymentUrl: khaltiData.payment_url,
+        shippingAddress: order.shippingAddress,
+        totalAmount: order.totalAmount,
+        message: 'Resuming khalti payment.',
+      };
+    }
+  }
+
   //* ---------------------- PAYMENT CALLBACKS ------------------
   async verifyEsewaPayment(encodedData: string) {
+    console.log('encoded dat: ', encodedData);
+
     console.log(' Verifying eSewa payment ...............');
     if (!encodedData) {
       throw new BadRequestException('Missing payment data from esewa.');
@@ -278,7 +315,7 @@ export class OrderService {
     }
 
     //? COMPARE AND VERIFY THE PAYLOAD, without this check an attacker can craft any payload and mark any order as paid without ever paying
-    const signedFields: string = decodedData.signedFields;
+    const signedFields: string = decodedData.signed_field_names;
     if (!signedFields) {
       throw new BadRequestException(
         'Missing signed_field_names in eSewa callback.',
@@ -303,8 +340,8 @@ export class OrderService {
 
     //? LOOK UP THE ORDER USING THE transaction_uuid FROM THE DECODED PAYLOAD, AND check for idempotency- payment security
     const order = await this.orderRepo.findOne({
-      where: { id: decodedData.orderId },
-      relations: ['payment'],
+      where: { id: decodedData.transaction_uuid },
+      relations: ['payment', 'order.items'],
     });
 
     if (!order) {
@@ -312,7 +349,7 @@ export class OrderService {
     }
 
     // check for idempotency, if this order is already completed, return success immediately without hitting the eSewa's API/
-    if (order.payment.status === PaymentStatus.COMPLETED) {
+    if (order.payment.status === PaymentStatus.PAID) {
       return {
         success: true,
         message: 'Payment already confirmed.',
@@ -336,15 +373,22 @@ export class OrderService {
         );
       }
 
-      order.payment.status = PaymentStatus.COMPLETED;
+      order.payment.status = PaymentStatus.PAID;
       order.payment.referenceId = result.ref_id;
       order.payment.transactionId = result.orderId;
       await this.paymentRepo.save(order.payment);
 
+      //decrement the product stock
+      for (const item of order.items) {
+        await this.productRepo.decrement(
+          { id: item.product.id },
+          'stock',
+          item.quantity,
+        );
+      }
+
       order.status = OrderStatus.PAID;
       await this.orderRepo.save(order);
-
-      console.log(`Order ${order.id} marked as PAID.`);
 
       return {
         success: true,
@@ -370,7 +414,7 @@ export class OrderService {
 
     const payment = await this.paymentRepo.findOne({
       where: { pidx },
-      relations: ['order'],
+      relations: ['order', 'order.items', 'order.items.product'],
     });
 
     if (!payment) {
@@ -378,7 +422,7 @@ export class OrderService {
     }
 
     //? CHECK FOR IDEMPOTENCY,  already completed - return success without re-processing
-    if ((payment.status = PaymentStatus.COMPLETED)) {
+    if (payment.status === PaymentStatus.PAID) {
       return {
         success: true,
         message: 'Payment already confirmed.',
@@ -402,9 +446,18 @@ export class OrderService {
         );
       }
 
-      payment.status = PaymentStatus.COMPLETED;
+      payment.status = PaymentStatus.PAID;
       payment.transactionId = result.transaction_id;
       await this.paymentRepo.save(payment);
+
+      // decrement the stock of the product
+      for (const item of payment.order.items) {
+        await this.productRepo.decrement(
+          { id: item.product.id },
+          'stock',
+          item.quantity,
+        );
+      }
 
       payment.order.status = OrderStatus.PAID;
       await this.orderRepo.save(payment.order);
@@ -579,7 +632,7 @@ export class OrderService {
   //* ----------------------- ADMIN: get payment report ------------------------
   async getPaymentReport() {
     const payments = await this.paymentRepo.find({
-      where: { status: PaymentStatus.COMPLETED },
+      where: { status: PaymentStatus.PAID },
       relations: ['order'],
     });
 

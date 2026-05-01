@@ -110,14 +110,14 @@ export class AuthController {
     const sessionId = req.user.sessionId;
     const refreshToken = req.user.refreshToken;
 
-    const token = await this.authService.refreshToken(
+    const accessToken = await this.authService.refreshToken(
       userId,
       sessionId,
       refreshToken,
       res,
     );
 
-    return { success: true, token };
+    return { success: true, accessToken };
   }
 
   // //* -------------------- FORGOT PASSWORD ------------------

@@ -12,6 +12,7 @@ import { PaymentModule } from '../payment/payment.module';
 import { ProfileModule } from '../profile/profile.module';
 import { CartModule } from '../cart/cart.module';
 import { ProductsModule } from '../products/products.module';
+import { UsersModule } from '../users/users.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { ProductsModule } from '../products/products.module';
     ProfileModule,
     CartModule,
     ProductsModule,
+    UsersModule,
   ],
   controllers: [OrderController],
   providers: [OrderService],

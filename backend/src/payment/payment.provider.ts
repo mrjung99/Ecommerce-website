@@ -1,6 +1,9 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import axios from 'axios';
 import * as crypto from 'crypto';
+import { Repository } from 'typeorm';
+import { Payment } from './entities/payment.entity';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class PaymentProvider {
@@ -12,13 +15,24 @@ export class PaymentProvider {
   private khaltiSecretKey = process.env.KHALTI_SECRET_KEY;
   private khaltiBaseUrl = process.env.KHALTI_BASE_URL;
 
+  private readonly logger = new Logger(PaymentProvider.name);
+
+  constructor(
+    @InjectRepository(Payment)
+    private readonly paymentRepo: Repository<Payment>,
+  ) {}
+
   //!=================== ESEWA ============================================
   //* ------------------------- GENERATE SIGNATURE ESEWA ----------------------------
   private generateEsewaSignature(orderid: string, amount: number) {
-    const message = `total_amount=${amount},transaction_uuid=${orderid},product_code=${this.productCode}`;
+    const message = `total_amount=${amount},transaction_uuid=${orderid},product_code=${this.productCode.trim()}`;
+
+    console.log('--- ESEWA DEBUG ---');
+    console.log('MESSAGE:', message);
+    console.log('AMOUNT:', amount);
 
     return crypto
-      .createHmac('sha256', this.secretKey)
+      .createHmac('sha256', this.secretKey.trim())
       .update(message)
       .digest('base64');
   }
@@ -26,6 +40,9 @@ export class PaymentProvider {
   //* ------------------------- INITIATE PAYMENT ESEWA ----------------------------
   initiateEsewaPayment(orderId: string, amount: number) {
     const signature = this.generateEsewaSignature(orderId, amount);
+
+    console.log('SIGNATURE:', signature);
+    console.log('PRODUCT_CODE:', this.productCode);
 
     return {
       amount,
@@ -50,23 +67,29 @@ export class PaymentProvider {
         Buffer.from(encodedData, 'base64').toString('utf-8'),
       );
 
-      console.log(`eSewa decoded response: `, decodedData);
+      this.logger.log(`eSewa decoded response: `, decodedData);
 
       const response = await axios.get(
         `${this.esewaBaseUrl}/api/epay/transaction/status/?product_code=${this.productCode}&total_amount=${decodedData.total_amount}&transaction_uuid=${decodedData.transaction_uuid}`,
       );
 
-      console.log(`eSewa status response: `, response.data);
+      this.logger.log(`eSewa status response: `, response.data);
 
       return {
         status: response.data.status,
         ref_id: response.data.ref_id ?? null,
         orderId: decodedData.transaction_uuid,
       };
-    } catch (error:any) {
-      console.log('eSewa verification error message:', error?.message);
-      console.log('eSewa verification error response:', error?.response?.data);
-      console.log('eSewa verification error status:', error?.response?.status);
+    } catch (error: any) {
+      this.logger.warn('eSewa verification error message:', error?.message);
+      this.logger.warn(
+        'eSewa verification error response:',
+        error?.response?.data,
+      );
+      this.logger.warn(
+        'eSewa verification error status:',
+        error?.response?.status,
+      );
       throw new BadRequestException(
         error?.response?.data?.message ?? 'eSewa verification failed',
       );
@@ -103,8 +126,8 @@ export class PaymentProvider {
 
       return response.data;
       // this will return {pidx, payment_url, expires_at}
-    } catch (error:any) {
-      console.log(`Khalti initiation error: ${error?.response?.data}`);
+    } catch (error: any) {
+      console.log('Khalti initiation error: ', error?.response?.data);
       throw new BadRequestException('Khalti payment initiation failed.');
     }
   }
@@ -124,9 +147,14 @@ export class PaymentProvider {
 
       return response.data;
       // this will return {status, transaction_id, total_amount}
-    } catch (error:any) {      
+    } catch (error: any) {
       console.log(`Khalti verification error: ${error?.response?.data}`);
       throw new BadRequestException('Khalti verification failed.');
     }
+  }
+
+  //* ------------------ REMOVE PAYMENT ------------
+  async removePayment(payment: Payment) {
+    return await this.paymentRepo.remove(payment);
   }
 }

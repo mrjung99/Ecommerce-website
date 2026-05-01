@@ -18,6 +18,7 @@ import { OtpService } from '../otp/otp.service';
 import { VerifyUserDto } from './dto/verify-user.dto';
 import { Status } from './enum/userStatus.enum';
 import { Provider } from './enum/provider.enum';
+import { ResendOtpDto } from './dto/resend-otp.dto';
 
 @Injectable()
 export class UsersService {
@@ -38,14 +39,13 @@ export class UsersService {
         where: { email: createUserDto.email },
       });
 
-      const profile = this.profileRepo.create(createUserDto.profile || {});
+      // const profile = this.profileRepo.create(createUserDto.profile || {});
 
       const hashedPassword = await argon2.hash(createUserDto.password);
 
       const user = this.userRepo.create({
         ...createUserDto,
         password: hashedPassword,
-        profile,
       });
 
       const { expiresAt, otp } = this.generateOtp();
@@ -183,6 +183,7 @@ export class UsersService {
   async findUserByEmail(email: string) {
     return await this.userRepo.findOne({
       where: { email },
+      relations: ['profile'],
     });
   }
 
