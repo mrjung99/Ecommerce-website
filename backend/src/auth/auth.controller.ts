@@ -52,8 +52,13 @@ export class AuthController {
     @Body() dto: LoginDto,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const accessToken = await this.authService.login(req, dto, res);
-    return { status: 'success', message: 'Login successful!!', accessToken };
+    const { accessToken, role } = await this.authService.login(req, dto, res);
+    return {
+      status: 'success',
+      message: 'Login successful!!',
+      accessToken,
+      user: { role },
+    };
   }
 
   //* ---------------- LOGIN WITH GOOGLE -----------
@@ -78,16 +83,11 @@ export class AuthController {
   async googleCallback(@Req() req, @Res() res) {
     const googleUser = req.user;
 
-    const accessToken = await this.authService.googleLogin(
-      googleUser,
-      req,
-      res,
-    );
+    await this.authService.googleLogin(googleUser, req, res);
 
     return {
       success: true,
       message: 'Login successful.',
-      accessToken,
     };
   }
 
@@ -110,14 +110,14 @@ export class AuthController {
     const sessionId = req.user.sessionId;
     const refreshToken = req.user.refreshToken;
 
-    const accessToken = await this.authService.refreshToken(
+    const { accessToken, role } = await this.authService.refreshToken(
       userId,
       sessionId,
       refreshToken,
       res,
     );
 
-    return { success: true, accessToken };
+    return { success: true, accessToken, user: { role } };
   }
 
   // //* -------------------- FORGOT PASSWORD ------------------
@@ -142,6 +142,7 @@ export class AuthController {
   @Public()
   @UseGuards(PasswordResetGuard)
   @Post('reset-password')
+  @HttpCode(HttpStatus.OK)
   @ApiBearerAuth('accessToken')
   @ApiOperation({ summary: 'Reset password' })
   @ApiOkResponse({ description: 'Success' })

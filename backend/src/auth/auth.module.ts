@@ -14,7 +14,7 @@ import { OtpModule } from '../otp/otp.module';
 import { SessionModule } from '../session/session.module';
 import passwordResetConfig from './configuration/password-reset.config';
 import { PasswordResetStrategy } from './strategy/password-reset.strategy';
-import { GoogleStrategy } from './strategy/goole-oauth.strategy';
+import { GoogleStrategy } from './strategy/google-oauth.strategy';
 
 @Module({
   imports: [

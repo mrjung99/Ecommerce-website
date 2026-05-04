@@ -1,84 +1,54 @@
-import axios from "axios";
-import { useEffect, useState } from "react";
-import { NavLink } from "react-router-dom";
+import { Navigate, NavLink, replace, useNavigate } from "react-router-dom";
 import { FaGoogle } from "react-icons/fa";
+import { useDispatch, useSelector } from "react-redux";
+import { useLoginMutation } from "../../redux/features/auth/authApi";
+import {
+  selectCurrentUser,
+  selectIsInitialized,
+  setCredentials,
+} from "../../redux/features/auth/authSlice";
+import { useState } from "react";
+import Loader from "../ui/Loader";
 
 const Login = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleGoogleButton = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const [authLogin, { isLoading, isError }] = useLoginMutation();
+
+  const user = useSelector(selectCurrentUser);
+  const isInitialized = useSelector(selectIsInitialized);
+
+  if (!isInitialized) <Loader />;
+
+  if (user) {
+    return <Navigate to={user.role === "admin" ? "/admin" : "/"} replace />;
+  }
+
+  const handleGoogleLogin = () => {
     window.location.href = "http://localhost:3000/api/v1/auth/google/login";
   };
 
-  const handleLogout = async () => {
-    const accessToken = localStorage.getItem("accessToken");
-    if (!accessToken) return;
-
+  const handleLogin = async (e) => {
+    e.preventDefault();
     try {
-      const res = await axios.post(
-        "http://localhost:3000/api/v1/auth/logout",
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-          withCredentials: true,
-        },
-      );
-
-      if (res.data.success) {
-        localStorage.removeItem("accessToken");
-        setIsLoggedIn(false);
-        alert("Logout successful.");
-        window.location.href = "/";
-      }
+      const data = await authLogin({ login, password }).unwrap();
+      dispatch(setCredentials(data));
+      redirectByRole(data.user.role, navigate);
+      console.log("Login successful.");
     } catch (error) {
-      console.error("Logout failed:", error.response?.data || error.message);
+      alert(error);
+      console.log(error);
     }
   };
 
-  useEffect(() => {
-    const token = localStorage.getItem("accessToken");
-    if (token) setIsLoggedIn(true);
-
-    const urlParams = new URLSearchParams(window.location.search);
-    const accessToken = urlParams.get("token");
-
-    if (accessToken) {
-      localStorage.setItem("accessToken", accessToken);
-      setIsLoggedIn(true);
-      window.history.replaceState({}, document.title, window.location.pathname);
-
-      setTimeout(() => {
-        window.location.href = "/";
-      }, 200);
-    }
-  }, []);
-
-  const handleLogin = async (e) => {
-    e.preventDefault();
-
-    try {
-      const res = await axios.post(
-        "http://localhost:3000/api/v1/auth/login",
-        { login, password },
-        {
-          headers: { "Content-Type": "application/json" },
-          withCredentials: true,
-        },
-      );
-
-      alert(res.data.message);
-      setLogin("");
-      setPassword("");
-
-      setTimeout(() => {
-        window.location.href = "/";
-      }, 200);
-    } catch (error) {
-      alert(error.response?.data?.message || "Login failed");
+  const redirectByRole = (role, navigate) => {
+    if (role === "admin") {
+      navigate("/admin", { replace: true });
+    } else {
+      navigate("/", { replace: true });
     }
   };
 
@@ -93,8 +63,8 @@ const Login = () => {
         {/* Google Login */}
         <div className="flex justify-center mt-6">
           <button
-            onClick={handleGoogleButton}
-            className="flex items-center justify-center gap-2 w-full text-sm sm:text-base px-4 py-2 rounded bg-orange-600 hover:bg-orange-500 text-white transition"
+            onClick={handleGoogleLogin}
+            className="flex items-center justify-center gap-2 w-full text-sm sm:text-base px-4 py-2 rounded bg-orange-600 hover:bg-orange-500 text-white transition cursor-pointer"
           >
             <FaGoogle />
             Log in with Google
@@ -149,15 +119,15 @@ const Login = () => {
           {/* Login Button */}
           <button
             type="submit"
-            className="w-full bg-orange-600 hover:bg-orange-500 text-white py-2 rounded transition"
+            className="w-full bg-orange-600 hover:bg-orange-500 text-white py-2 rounded transition cursor-pointer"
           >
-            Log In
+            {isLoading ? "Logging in..." : "Log in"}
           </button>
         </form>
 
         {/* Signup */}
         <div className="text-sm text-gray-700 text-center mt-4">
-          Don’t have an account?{" "}
+          Don’t have an account?
           <NavLink to="/register" className="text-blue-500 hover:text-blue-600">
             Signup
           </NavLink>

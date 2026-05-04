@@ -3,6 +3,7 @@ import { FaBagShopping } from "react-icons/fa6";
 import { GrPrevious } from "react-icons/gr";
 import { GrNext } from "react-icons/gr";
 import ProductCard from "../ui/ProductCard";
+import { NavLink } from "react-router-dom";
 
 const Home = () => {
   const boxRef = useRef(null);
@@ -42,10 +43,12 @@ const Home = () => {
           />
           <div className="absolute -top-5 left-5 h-full lg:h-full w-[95%]  bg-blue-200 z-1"></div>
         </div>
-        <button className="relative -top-20 z-40 lg:absolute lg:left-20 lg:top-75 flex items-center gap-3 bg-orange-600 text-lg text-gray-200 px-3 py-1 rounded-md hover:translate-x-1 w-fit hover:bg-orange-500 cursor-pointer transition-all duration-100">
-          <FaBagShopping />
-          <span>Shop Now</span>
-        </button>
+        <NavLink to="/products">
+          <button className="relative -top-20 z-40 lg:absolute lg:left-20 lg:top-75 flex items-center gap-3 bg-orange-600 text-lg text-gray-200 px-3 py-1 rounded-md hover:translate-x-1 w-fit hover:bg-orange-500 cursor-pointer transition-all duration-100">
+            <FaBagShopping />
+            <span>Shop Now</span>
+          </button>
+        </NavLink>
       </div>
       <div className="my-20">
         <h2 className="text-xl my-1 font-sans text-gray-800 mb-2 ">
@@ -61,7 +64,7 @@ const Home = () => {
             <GrPrevious size={23} />
           </button>
           <button
-            className=" absolute z-60 top-1/2 -translate-y-1/2 right-0 flex justify-center 
+            className=" absolute z-40 top-1/2 -translate-y-1/2 right-0 flex justify-center 
             items-center bg-[rgba(0,0,0,0.4)] hover:bg-[rgba(0,0,0,0.6)] p-1 rounded-full
           text-white h-10.5 w-10.5 cursor-pointer"
             onClick={handleNext}

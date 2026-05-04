@@ -74,7 +74,8 @@ export class AuthService {
     if (!isValidPassword)
       throw new UnauthorizedException('Invalid credentials.');
 
-    return this.issueToken(user, req, res);
+    const accessToken = await this.issueToken(user, req, res);
+    return { accessToken, role: user.role };
   }
 
   //* ------------------ LOGIN (GOOGLE) ----------------------
@@ -108,7 +109,9 @@ export class AuthService {
 
     const accessToken = await this.issueToken(user, req, res);
 
-    res.redirect(`http://localhost:5173/login?token=${accessToken}`);
+    res.redirect(
+      `${process.env.FRONTEND_URL}/oauth/callback#token=${accessToken}&role=${user.role}`,
+    );
   }
 
   //* ------------- ISSUE TOKEN (SET COOKIE, INITIATE SESSION, SAVE SESSION) ---------------
@@ -127,18 +130,18 @@ export class AuthService {
 
     await this.sessionService.saveHashedSession(session.id, hashedRefreshToken);
 
-    await this.setCookie(refreshToken, res);
+    await this.setCookie(res, refreshToken);
 
     return accessToken;
   }
 
   //* -------------- SET COOKIE -------------
-  async setCookie(refreshToken: string, res: Response) {
+  async setCookie(res: Response, refreshToken: string) {
     return res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: false,
       sameSite: 'lax',
-      path: '/',
+      path: '/api/v1/auth/refresh',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
   }
@@ -191,9 +194,9 @@ export class AuthService {
     const hashedRefreshToken = await argon2.hash(refreshToken);
     await this.sessionService.saveHashedSession(sessionId, hashedRefreshToken);
 
-    this.setCookie(refreshToken, res);
+    await this.setCookie(res, refreshToken);
 
-    return accessToken;
+    return { accessToken, role: user.role };
   }
 
   //* --------------------- FORGOT PASSWORD ------------------
