@@ -25,7 +25,6 @@ import Orders from "./component/pages/Orders";
 import Profile from "./component/pages/Profile";
 import Loader from "./component/ui/Loader";
 import AdminRoute from "./protected routes/AdminRoute";
-import AddProduct from "./component/pages/admin/pages/AdminProduct";
 import AdminDashboard from "./component/pages/admin/pages/AdminDashboard";
 import AdminProduct from "./component/pages/admin/pages/AdminProduct";
 import Products from "./component/pages/Products";

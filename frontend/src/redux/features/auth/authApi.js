@@ -41,6 +41,9 @@ export const authApi = createApi({
         method: "POST",
       }),
     }),
+    getProfile: builder.query({
+      query: () => "/users",
+    }),
   }),
 });
 
@@ -49,4 +52,5 @@ export const {
   useRefreshMutation,
   useLogoutMutation,
   useLogoutAllMutation,
+  useGetProfileQuery,
 } = authApi;

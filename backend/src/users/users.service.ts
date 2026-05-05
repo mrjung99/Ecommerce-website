@@ -189,7 +189,15 @@ export class UsersService {
 
   //* ------------------ FIND USER BY ID --------------
   async findUserById(userId: string) {
-    return await this.userRepo.findOneBy({ id: userId });
+    return await this.userRepo.findOne({
+      where: { id: userId },
+      select: {
+        id: true,
+        userName: true,
+        email: true,
+      },
+      relations: ['profile'],
+    });
   }
 
   //* ---------------- FIND USER BY USERNAME OR EMAIL -----------------

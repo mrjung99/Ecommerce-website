@@ -1,6 +1,6 @@
 import React from "react";
 import productImage from "../../assets/download.jpg";
-import AddToCardButton from "./AddtoCardButton";
+import { MdAddShoppingCart } from "react-icons/md";
 
 const ProductCard = () => {
   return (
@@ -24,7 +24,10 @@ const ProductCard = () => {
         </p>
       </div>
       <div className="mt-2">
-        <AddToCardButton />
+        <button className="flex bg-emerald-600 hover:bg-emerald-700 text-gray-100 items-center gap-2 px-2 py-1 rounded text-sm cursor-pointer">
+          <MdAddShoppingCart />
+          <span>Add to cart</span>
+        </button>
       </div>
     </div>
   );

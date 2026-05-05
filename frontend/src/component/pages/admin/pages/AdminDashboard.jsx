@@ -1,9 +1,10 @@
 import React from "react";
+import AdminDashboardGrid from "../ui/AdminDashboardGrid";
 
 const AdminDashboard = () => {
   return (
-    <div className="relative">
-      <h1>This is admin Dashboard.</h1>
+    <div className="relative w-full">
+      <AdminDashboardGrid />
     </div>
   );
 };

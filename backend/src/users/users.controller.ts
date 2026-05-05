@@ -62,6 +62,7 @@ export class UsersController {
       data: {
         id: user.id,
         email: user.email,
+        userName: user.userName,
         profile: user.profile,
       },
     };

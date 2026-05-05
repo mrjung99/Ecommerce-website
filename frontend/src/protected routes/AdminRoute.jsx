@@ -1,9 +1,6 @@
 import React from "react";
 import { useSelector } from "react-redux";
-import {
-  selectCurrentUser,
-  selectIsInitialized,
-} from "../redux/features/auth/authSlice";
+import { selectCurrentUser } from "../redux/features/auth/authSlice";
 import { Navigate } from "react-router-dom";
 
 const AdminRoute = ({ children }) => {

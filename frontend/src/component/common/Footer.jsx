@@ -17,16 +17,16 @@ const Footer = () => {
               <span>info@sajhastore.com</span>
             </div>
             <div className="flex gap-3 text-gray-300">
-              <div className="cursor-pointer outline hover:text-orange-500 outline-gray-200 hover:outline-orange-400 transition-all duration-300 rounded-full p-1.5">
+              <div className="cursor-pointer outline hover:text-orange-300 outline-gray-200 hover:outline-orange-300 transition-all duration-300 rounded-full p-1.5">
                 <FaFacebook />
               </div>
-              <div className="cursor-pointer outline hover:text-orange-500 outline-gray-200 hover:outline-orange-400 transition-all duration-300 rounded-full p-1.5">
+              <div className="cursor-pointer outline hover:text-orange-300 outline-gray-200 hover:outline-orange-300 transition-all duration-300 rounded-full p-1.5">
                 <FaTiktok />
               </div>
-              <div className="cursor-pointer outline hover:text-orange-500 outline-gray-200 hover:outline-orange-400 transition-all duration-300 rounded-full p-1.5">
+              <div className="cursor-pointer outline hover:text-orange-300 outline-gray-200 hover:outline-orange-400 transition-all duration-300 rounded-full p-1.5">
                 <FaInstagram />
               </div>
-              <div className="cursor-pointer outline hover:text-orange-500 outline-gray-200 hover:outline-orange-400 transition-all duration-300 rounded-full p-1.5">
+              <div className="cursor-pointer outline hover:text-orange-300 outline-gray-200 hover:outline-orange-300 transition-all duration-300 rounded-full p-1.5">
                 <FaYoutube />
               </div>
             </div>

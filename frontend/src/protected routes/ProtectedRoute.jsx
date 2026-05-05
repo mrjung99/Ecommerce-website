@@ -11,6 +11,10 @@ export default function ProtectedRoute({ children, allowedRoles }) {
   const user = useSelector(selectCurrentUser);
   const isInitialized = useSelector(selectIsInitialized);
 
+  if (!isInitialized) {
+    return <Loader />;
+  }
+
   if (!user) return <Navigate to="/login" replace />;
 
   if (allowedRoles && !allowedRoles.includes(user.role)) {

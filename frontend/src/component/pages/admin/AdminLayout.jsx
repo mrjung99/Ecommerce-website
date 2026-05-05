@@ -9,7 +9,7 @@ const AdminLayout = () => {
   const [collapsed, setCollapsed] = useState(false);
 
   return (
-    <div className="h-screen flex overflow-hidden bg-gray-100 dark:bg-gray-900">
+    <div className="h-screen flex  bg-gray-100 dark:bg-linear-to-r dark:from-gray-900 dark:to-gray-800 ">
       {/* Mobile Sidebar Overlay */}
       <div
         className={`fixed top-16 inset-0 bg-black bg-opacity-40 z-30 md:hidden transition ${
@@ -30,7 +30,7 @@ const AdminLayout = () => {
 
       {/* Main Content */}
       <div
-        className={`flex flex-col flex-1 transition-all duration-300
+        className={`flex flex-col flex-1 transition-all duration-300 
         ${collapsed ? "md:ml-20" : "md:ml-64"}`}
       >
         {/* Topbar */}
@@ -47,7 +47,7 @@ const AdminLayout = () => {
         </div>
 
         {/* Content */}
-        <main className="mt-16 p-4 h-[calc(100vh-4rem)] text-gray-900 dark:text-gray-100">
+        <main className="mt-16 p-4 overflow-y-auto text-gray-900 dark:text-gray-100">
           <Outlet />
         </main>
       </div>

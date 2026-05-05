@@ -1,9 +1,9 @@
 import React, { useRef } from "react";
-import { FaBagShopping } from "react-icons/fa6";
 import { GrPrevious } from "react-icons/gr";
 import { GrNext } from "react-icons/gr";
 import ProductCard from "../ui/ProductCard";
 import { NavLink } from "react-router-dom";
+import ShopNowButton from "../ui/ShopNowButton";
 
 const Home = () => {
   const boxRef = useRef(null);
@@ -44,10 +44,7 @@ const Home = () => {
           <div className="absolute -top-5 left-5 h-full lg:h-full w-[95%]  bg-blue-200 z-1"></div>
         </div>
         <NavLink to="/products">
-          <button className="relative -top-20 z-40 lg:absolute lg:left-20 lg:top-75 flex items-center gap-3 bg-orange-600 text-lg text-gray-200 px-3 py-1 rounded-md hover:translate-x-1 w-fit hover:bg-orange-500 cursor-pointer transition-all duration-100">
-            <FaBagShopping />
-            <span>Shop Now</span>
-          </button>
+          <ShopNowButton />
         </NavLink>
       </div>
       <div className="my-20">

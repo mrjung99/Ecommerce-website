@@ -7,6 +7,14 @@ import { MdDarkMode, MdLightMode } from "react-icons/md";
 import useLogout from "../../../../hooks/useLogout";
 import AdminProfileOptions from "../ui/AdminProfileOptions";
 import { IoCaretDownSharp } from "react-icons/io5";
+import { useSelector } from "react-redux";
+import {
+  selectCurrentUser,
+  selectProfile,
+} from "../../../../redux/features/auth/authSlice";
+import { useGetProfileQuery } from "../../../../redux/features/auth/authApi";
+import extractName from "../../../../utils/ExtractUserName";
+import truncateName from "../../../../utils/truncateName";
 
 const AdminTopBar = ({
   toggleSidebar,
@@ -15,8 +23,11 @@ const AdminTopBar = ({
   collapsed,
 }) => {
   const [dark, setDark] = useState(true);
-  const { logoutUser, isLoading } = useLogout();
-  const [showProfileOptions, setShowProfileOptions] = useState(false);
+  const user = useSelector(selectCurrentUser);
+  const { data } = useGetProfileQuery(undefined, { skip: !user });
+
+  const userName = extractName(data);
+  const avatarImage = data?.data?.profile?.avatarUrl;
 
   const handleDarkMode = () => {
     setDark(!dark);
@@ -86,10 +97,14 @@ const AdminTopBar = ({
         <div className="relative flex items-center gap-3 cursor-pointer group">
           {/* Profile Info */}
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-gray-400 rounded-full overflow-hidden" />
+            <div className="w-8 h-8 bg-gray-400 rounded-full overflow-hidden">
+              <img src={avatarImage} alt="" />
+            </div>
 
-            <div className="hidden sm:block">
-              <p className="text-gray-200 text-sm leading-4">Kinmel bazar</p>
+            <div className="hidden sm:block text-center">
+              <p className="text-gray-200 font-thin text-sm leading-5">
+                {truncateName(userName, 10)}
+              </p>
               <p className="text-gray-400 text-xs">Admin</p>
             </div>
 

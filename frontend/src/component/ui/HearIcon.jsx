@@ -4,7 +4,7 @@ const HeartIcon = () => {
   return (
     <div className="relative">
       <IoIosHeartEmpty
-        size={22}
+        size={23}
         className="fill-current cursor-pointer text-gray-700"
       />
 

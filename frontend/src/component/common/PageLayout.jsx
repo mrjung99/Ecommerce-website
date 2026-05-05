@@ -1,14 +1,14 @@
 import React from "react";
-import NabBar from "./NabBar";
 import { Outlet } from "react-router-dom";
 import Footer from "./Footer";
 import TopBar from "./TopBar";
+import NavBar from "./NavBar";
 
 const PageLayout = () => {
   return (
     <div>
       <TopBar />
-      <NabBar />
+      <NavBar />
       <Outlet />
       <Footer />
     </div>
