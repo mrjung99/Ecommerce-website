@@ -37,23 +37,23 @@ import googleOauthConfig from './configuration/google-oauth.config';
       validationSchema: envValidator,
       isGlobal: true,
     }),
-    TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
-        autoLoadEntities: true,
-        synchronize: true, // remove while production
-        host: configService.get('database.host'),
-        port: configService.get('database.port'),
-        username: configService.get('database.userName'),
-        password: configService.get('database.password'),
-        database: configService.get('database.name'),
-        ssl: {
-          rejectUnauthorized: false,
-        },
-      }),
-    }),
+    // TypeOrmModule.forRootAsync({
+    //   imports: [ConfigModule],
+    //   inject: [ConfigService],
+    //   useFactory: (configService: ConfigService) => ({
+    //     type: 'postgres',
+    //     autoLoadEntities: true,
+    //     synchronize: true, // remove while production
+    //     host: configService.get('database.host'),
+    //     port: configService.get('database.port'),
+    //     username: configService.get('database.userName'),
+    //     password: configService.get('database.password'),
+    //     database: configService.get('database.name'),
+    //     ssl: {
+    //       rejectUnauthorized: false,
+    //     },
+    //   }),
+    // }),
 
     MailModule,
     ProfileModule,
