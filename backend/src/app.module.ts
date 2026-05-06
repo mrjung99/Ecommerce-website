@@ -49,6 +49,9 @@ import googleOauthConfig from './configuration/google-oauth.config';
         username: configService.get('database.userName'),
         password: configService.get('database.password'),
         database: configService.get('database.name'),
+        ssl: {
+          rejectUnauthorized: false,
+        },
       }),
     }),
 
