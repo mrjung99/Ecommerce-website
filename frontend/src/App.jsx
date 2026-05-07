@@ -32,6 +32,107 @@ import AdminUsers from "./component/pages/admin/pages/AdminUsers";
 import AdminOrders from "./component/pages/admin/pages/AdminOrders";
 import AdminPayment from "./component/pages/admin/pages/AdminPayment";
 
+const router = createBrowserRouter([
+  {
+    path: "/oauth/callback",
+    element: <OauthCallBack />,
+  },
+  {
+    element: <PageLayout />,
+    children: [
+      // public routes
+      {
+        path: "/",
+        element: <Home />,
+      },
+      {
+        path: "/login",
+        element: <Login />,
+      },
+      {
+        path: "/register",
+        element: <Register />,
+      },
+      {
+        path: "/products",
+        element: <Products />,
+      },
+
+      // user protected routes
+      {
+        path: "/cart",
+        element: (
+          <ProtectedRoute allowedRoles={["user"]}>
+            <Cart />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/wishlist",
+        element: (
+          <ProtectedRoute allowedRoles={["user"]}>
+            <WishList />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/orders",
+        element: (
+          <ProtectedRoute allowedRoles={["user"]}>
+            <Orders />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/profile",
+        element: (
+          <ProtectedRoute allowedRoles={["user"]}>
+            <Profile />
+          </ProtectedRoute>
+        ),
+      },
+    ],
+  },
+
+  {
+    path: "/admin",
+    element: (
+      <AdminRoute>
+        <AdminLayout />
+      </AdminRoute>
+    ),
+
+    children: [
+      {
+        index: true,
+        element: <AdminDashboard />,
+      },
+      {
+        path: "products",
+        element: <AdminProduct />,
+      },
+      {
+        path: "users",
+        element: <AdminUsers />,
+      },
+      {
+        path: "orders",
+        element: <AdminOrders />,
+      },
+      {
+        path: "payment",
+        element: <AdminPayment />,
+      },
+    ],
+  },
+
+  // Catch all
+  {
+    path: "*",
+    element: <Navigate to="/" replace />,
+  },
+]);
+
 const App = () => {
   const dispatch = useDispatch();
   const [refresh] = useRefreshMutation();
@@ -54,106 +155,6 @@ const App = () => {
 
   if (!isInitialized) return <Loader />;
 
-  const router = createBrowserRouter([
-    {
-      path: "/oauth/callback",
-      element: <OauthCallBack />,
-    },
-    {
-      element: <PageLayout />,
-      children: [
-        // public routes
-        {
-          path: "/",
-          element: <Home />,
-        },
-        {
-          path: "/login",
-          element: <Login />,
-        },
-        {
-          path: "/register",
-          element: <Register />,
-        },
-        {
-          path: "/products",
-          element: <Products />,
-        },
-
-        // user protected routes
-        {
-          path: "/cart",
-          element: (
-            <ProtectedRoute allowedRoles={["user"]}>
-              <Cart />
-            </ProtectedRoute>
-          ),
-        },
-        {
-          path: "/wishlist",
-          element: (
-            <ProtectedRoute allowedRoles={["user"]}>
-              <WishList />
-            </ProtectedRoute>
-          ),
-        },
-        {
-          path: "/orders",
-          element: (
-            <ProtectedRoute allowedRoles={["user"]}>
-              <Orders />
-            </ProtectedRoute>
-          ),
-        },
-        {
-          path: "/profile",
-          element: (
-            <ProtectedRoute allowedRoles={["user"]}>
-              <Profile />
-            </ProtectedRoute>
-          ),
-        },
-      ],
-    },
-
-    {
-      path: "/admin",
-      element: (
-        <AdminRoute>
-          <AdminLayout />
-        </AdminRoute>
-      ),
-
-      children: [
-        {
-          index: true,
-          element: <AdminDashboard />,
-        },
-        {
-          path: "products",
-          element: <AdminProduct />,
-        },
-        {
-          path: "users",
-          element: <AdminUsers />,
-        },
-        {
-          path: "orders",
-          element: <AdminOrders />,
-        },
-        {
-          path: "payment",
-          element: <AdminPayment />,
-        },
-      ],
-    },
-
-    // Catch all
-    {
-      path: "*",
-      element: <Navigate to="/" replace />,
-    },
-  ]);
   return <RouterProvider router={router} />;
 };
 
