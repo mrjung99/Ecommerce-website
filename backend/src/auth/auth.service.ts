@@ -139,8 +139,8 @@ export class AuthService {
   async setCookie(res: Response, refreshToken: string) {
     return res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
-      secure: false,
-      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
       path: '/api/v1/auth/refresh',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
