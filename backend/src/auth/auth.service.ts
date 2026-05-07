@@ -174,6 +174,9 @@ export class AuthService {
     res: Response,
   ) {
     const user = await this.userService.findUserById(userId);
+    console.log('user', user);
+    console.log('roe', user?.role);
+
     if (!user) {
       throw new UnauthorizedException();
     }

@@ -195,6 +195,7 @@ export class UsersService {
         id: true,
         userName: true,
         email: true,
+        role: true,
       },
       relations: ['profile'],
     });
