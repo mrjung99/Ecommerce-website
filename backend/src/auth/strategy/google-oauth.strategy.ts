@@ -24,19 +24,12 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     profile: any,
     done: VerifyCallback,
   ) {
-    const user = await this.userService.findUserByEmail(
-      profile.emails?.[0].value,
-    );
-
-    if (!user) throw new UnauthorizedException('User not found.');
-
     done(null, {
       email: profile.emails?.[0].value,
       firstName: profile.name.givenName,
       lastName: profile.name.familyName,
       avatarUrl: profile.photos[0].value,
       googleId: profile.id,
-      role: user.role,
     });
   }
 }
