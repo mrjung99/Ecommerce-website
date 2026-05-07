@@ -24,10 +24,12 @@ import mailConfiguration from './configuration/mail.configuration';
 import envValidator from './configuration/env.validator';
 import googleOauthConfig from './configuration/google-oauth.config';
 
+console.log('Env:', process.env.NODE_ENV);
+
 @Module({
   imports: [
     ConfigModule.forRoot({
-      envFilePath: '.env',
+      envFilePath: `${process.env.NODE_ENV === 'production' ? '.env.production' : '.env.development'}`,
       load: [
         appConfiguration,
         mailConfiguration,
