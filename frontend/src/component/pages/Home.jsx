@@ -6,8 +6,6 @@ import { NavLink } from "react-router-dom";
 import ShopNowButton from "../ui/ShopNowButton";
 
 const Home = () => {
-  console.log("API URL : ", import.meta.env.VITE_API_URL);
-
   const boxRef = useRef(null);
   const handlePrev = () => {
     if (boxRef.current) {
