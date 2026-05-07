@@ -142,7 +142,6 @@ const App = () => {
     const silentRefresh = async () => {
       try {
         const data = await refresh().unwrap();
-        console.log("access route res: ", data);
 
         dispatch(setCredentials(data));
       } catch {
