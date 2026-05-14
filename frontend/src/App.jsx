@@ -1,4 +1,3 @@
-// App.jsx
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import PageLayout from "./component/common/PageLayout";
@@ -32,6 +31,11 @@ import AdminUsers from "./component/pages/admin/pages/AdminUsers";
 import AdminOrders from "./component/pages/admin/pages/AdminOrders";
 import AdminPayment from "./component/pages/admin/pages/AdminPayment";
 
+// ✅ Toast import
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import ProductDetails from "./component/pages/ProductDetails";
+
 const router = createBrowserRouter([
   {
     path: "/oauth/callback",
@@ -40,25 +44,14 @@ const router = createBrowserRouter([
   {
     element: <PageLayout />,
     children: [
-      // public routes
+      { path: "/", element: <Home /> },
+      { path: "/login", element: <Login /> },
+      { path: "/register", element: <Register /> },
+      { path: "/products", element: <Products /> },
       {
-        path: "/",
-        element: <Home />,
+        path: "productDetails/:id",
+        element: <ProductDetails />,
       },
-      {
-        path: "/login",
-        element: <Login />,
-      },
-      {
-        path: "/register",
-        element: <Register />,
-      },
-      {
-        path: "/products",
-        element: <Products />,
-      },
-
-      // user protected routes
       {
         path: "/cart",
         element: (
@@ -101,32 +94,15 @@ const router = createBrowserRouter([
         <AdminLayout />
       </AdminRoute>
     ),
-
     children: [
-      {
-        index: true,
-        element: <AdminDashboard />,
-      },
-      {
-        path: "products",
-        element: <AdminProduct />,
-      },
-      {
-        path: "users",
-        element: <AdminUsers />,
-      },
-      {
-        path: "orders",
-        element: <AdminOrders />,
-      },
-      {
-        path: "payment",
-        element: <AdminPayment />,
-      },
+      { index: true, element: <AdminDashboard /> },
+      { path: "products", element: <AdminProduct /> },
+      { path: "users", element: <AdminUsers /> },
+      { path: "orders", element: <AdminOrders /> },
+      { path: "payment", element: <AdminPayment /> },
     ],
   },
 
-  // Catch all
   {
     path: "*",
     element: <Navigate to="/" replace />,
@@ -144,9 +120,9 @@ const App = () => {
         const data = await refresh().unwrap();
         dispatch(setCredentials(data));
       } catch {
-        // No valid session, user needs to log in
+        // no session
       } finally {
-        dispatch(setInitialized()); // always mark as done
+        dispatch(setInitialized());
       }
     };
 
@@ -155,7 +131,23 @@ const App = () => {
 
   if (!isInitialized) return <Loader />;
 
-  return <RouterProvider router={router} />;
+  return (
+    <>
+      {/* ✅ GLOBAL TOAST CONTAINER */}
+      <ToastContainer
+        position="top-right"
+        autoClose={4000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        pauseOnHover
+        draggable
+        theme="dark"
+      />
+
+      <RouterProvider router={router} />
+    </>
+  );
 };
 
 export default App;

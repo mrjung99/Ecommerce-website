@@ -22,6 +22,7 @@ const NavBar = () => {
 
   const user = useSelector(selectCurrentUser);
   const { data } = useGetProfileQuery(undefined, { skip: !user }); // this will fetch the user profile only if logged in
+  console.log("user:", user);
 
   const avatarImage = data?.data?.profile?.avatarUrl;
   const userName = extractName(data);

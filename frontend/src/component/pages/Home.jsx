@@ -72,16 +72,7 @@ const Home = () => {
           <div
             ref={boxRef}
             className="flex gap-6 overflow-x-hidden p-3 scroll-smooth bg-white"
-          >
-            <ProductCard />
-            <ProductCard />
-            <ProductCard />
-            <ProductCard />
-            <ProductCard />
-            <ProductCard />
-            <ProductCard />
-            <ProductCard />
-          </div>
+          ></div>
         </div>
       </div>
     </section>
