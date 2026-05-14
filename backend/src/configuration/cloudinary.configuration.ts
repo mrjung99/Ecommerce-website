@@ -1,20 +1,17 @@
 import { v2 as cloudinary } from 'cloudinary';
-import * as dotenv from 'dotenv';
 
-dotenv.config();
+// if (!process.env.CLOUDINARY_API_SECRET) {
+//   console.log('cloudinary secret key is not provided.');
+// } else if (!process.env.CLOUDINARY_CLOUD_NAME) {
+//   console.log('Cloudinary name is not provided.');
+// } else if (!process.env.CLOUDINARY_API_KEY) {
+//   console.log('Cloudinary api key is not provided.');
+// }
 
-if (!process.env.CLOUDINARY_API_SECRET) {
-  console.log('cloudinary secret key is not provided.');
-} else if (!process.env.CLOUDINARY_CLOUD_NAME) {
-  console.log('Cloudinary name is not provided.');
-} else if (!process.env.CLOUDINARY_API_KEY) {
-  console.log('Cloudinary api key is not provided.');
-}
-
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
+// cloudinary.config({
+//   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+//   api_key: process.env.CLOUDINARY_API_KEY,
+//   api_secret: process.env.CLOUDINARY_API_SECRET,
+// });
 
 export default cloudinary;

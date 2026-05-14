@@ -71,7 +71,7 @@ export class ProductsController {
     );
 
     return {
-      status: 'success',
+      success: true,
       products,
     };
   }

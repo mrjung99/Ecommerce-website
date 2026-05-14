@@ -1,4 +1,11 @@
-import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { CloudinaryService } from './cloudinary.service';
 import RolesGuard from '../auth/guard/roles.guard';
 import { Roles } from '../auth/decorator/roles.decorator';
@@ -14,5 +21,19 @@ export class CloudinaryController {
   @Get('signature')
   async getSignature(@Query('folder') folder: string = 'products') {
     return await this.cloudinaryService.generateSignature(folder);
+  }
+
+  //* --------------------- DELETE PRODUCT IMAGE --------------------
+  @Roles(Role.ADMIN, Role.MODERATOR)
+  @UseGuards(RolesGuard)
+  @Delete('deleteImage')
+  async deleteProductImage(@Body('publicId') publicId: string) {
+    console.log('Image delete called with public id: ', publicId);
+
+    await this.cloudinaryService.deleteImageFromCloudinary(publicId);
+    return {
+      success: true,
+      message: 'Image deleted successfully.',
+    };
   }
 }

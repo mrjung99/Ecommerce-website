@@ -12,5 +12,9 @@ export default Joi.object({
   MAIL_PORT: Joi.number().port().default(587),
   MAIL_HOST: Joi.string().required(),
   CLOUDINARY_API_SECRET: Joi.string().required(),
-  DB_URL: Joi.string().required(),
+  DB_URL: Joi.when('NODE_ENV', {
+    is: 'production',
+    then: Joi.required(),
+    otherwise: Joi.optional(),
+  }),
 });

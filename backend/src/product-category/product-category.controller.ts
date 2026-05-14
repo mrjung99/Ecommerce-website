@@ -15,7 +15,7 @@ import { Roles } from '../auth/decorator/roles.decorator';
 import { Role } from '../auth/enum/role.enum';
 import { Public } from '../auth/decorator/public.decorator';
 
-@Controller('product-category')
+@Controller('categories')
 export class ProductCategoryController {
   constructor(
     private readonly productCategoryService: ProductCategoryService,
