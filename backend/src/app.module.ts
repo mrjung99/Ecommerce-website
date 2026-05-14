@@ -24,8 +24,6 @@ import mailConfiguration from './configuration/mail.configuration';
 import envValidator from './configuration/env.validator';
 import googleOauthConfig from './configuration/google-oauth.config';
 
-console.log('Env:', process.env.NODE_ENV);
-
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -42,22 +40,31 @@ console.log('Env:', process.env.NODE_ENV);
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
-        autoLoadEntities: true,
-        synchronize: process.env.NODE_ENV !== 'production', // remove while production
-        url: configService.get<string>('database.url'),
-        host: configService.get('database.host'),
-        port: configService.get('database.port'),
-        username: configService.get('database.userName'),
-        password: configService.get('database.password'),
-        database: configService.get('database.name'),
-        ssl: {
-          rejectUnauthorized: false,
-        },
-      }),
-    }),
+      useFactory: (configService: ConfigService) => {
+        const isProd = process.env.NODE_ENV === 'production';
 
+        return {
+          type: 'postgres',
+          autoLoadEntities: true,
+          synchronize: !isProd,
+
+          ...(isProd
+            ? {
+                url: configService.get<string>('database.url'),
+                ssl: {
+                  rejectUnauthorized: false,
+                },
+              }
+            : {
+                host: configService.get<string>('database.host'),
+                port: configService.get<number>('database.port'),
+                username: configService.get<string>('database.userName'),
+                password: configService.get<string>('database.password'),
+                database: configService.get<string>('database.name'),
+              }),
+        };
+      },
+    }),
     MailModule,
     ProfileModule,
     UsersModule,
