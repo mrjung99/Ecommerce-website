@@ -13,11 +13,7 @@ const ProductCard = ({ product }) => {
 
   const handleAddToCart = async (productId, quantity = 1) => {
     try {
-      console.log("Add to cart called: ", productId, quantity);
-
       await addToCart({ productId, quantity }).unwrap();
-
-      toast.success("Product added to the cart.");
     } catch (error) {
       toast.error("Something went wrong.");
     }

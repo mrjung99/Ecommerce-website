@@ -1,10 +1,12 @@
 import { useGetAllProductsQuery } from "../../redux/features/product/productApi";
+import Loader from "../ui/Loader";
 import ProductCard from "../ui/ProductCard";
 
 const Products = () => {
-  const { data } = useGetAllProductsQuery();
+  const { data, isLoading } = useGetAllProductsQuery();
   const products = data?.products;
-  console.log(data?.products);
+
+  if (isLoading) return <Loader />;
 
   if (!products) {
     return (

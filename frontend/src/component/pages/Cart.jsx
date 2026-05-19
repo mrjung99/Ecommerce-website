@@ -17,13 +17,10 @@ const Cart = () => {
   const [clearCart] = useClearCartMutation();
   const cartItems = data?.cart?.cart?.items || [];
   const cart = data?.cart || [];
-  console.log("data: ", data);
-  console.log("cartItems: ", cartItems);
 
   const handleDeleteItem = async (id) => {
     try {
       await deleteItem(id).unwrap();
-      toast.success("Item deleted successfully.");
     } catch (error) {
       toast.error("Failed to delete item.");
     }
@@ -31,13 +28,8 @@ const Cart = () => {
 
   const handleClearCart = async () => {
     try {
-      const result = await clearCart().unwrap();
-      console.log("clear result: ", result);
-
-      toast.success("Cart is cleared.");
+      await clearCart().unwrap();
     } catch (error) {
-      console.log("clear error: ", error);
-
       toast.error(error.data.message || "Failed to clear cart.");
     }
   };
