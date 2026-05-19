@@ -1,10 +1,26 @@
 import { MdAddShoppingCart } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
+import { useAddToCartMutation } from "../../redux/features/product/cartApi";
+import { toast } from "react-toastify";
 
 const ProductCard = ({ product }) => {
   const navigate = useNavigate();
   const goToDetails = () => {
     navigate(`/productDetails/${product.id}`);
+  };
+
+  const [addToCart] = useAddToCartMutation();
+
+  const handleAddToCart = async (productId, quantity = 1) => {
+    try {
+      console.log("Add to cart called: ", productId, quantity);
+
+      await addToCart({ productId, quantity }).unwrap();
+
+      toast.success("Product added to the cart.");
+    } catch (error) {
+      toast.error("Something went wrong.");
+    }
   };
 
   return (
@@ -37,7 +53,10 @@ const ProductCard = ({ product }) => {
         </p>
       </div>
       <div className="mt-2">
-        <button className="flex bg-emerald-600 hover:bg-emerald-700 text-gray-100 items-center gap-2 px-2 py-1 rounded text-sm cursor-pointer">
+        <button
+          className="flex bg-emerald-600 hover:bg-emerald-700 text-gray-100 items-center gap-2 px-2 py-1 rounded text-sm cursor-pointer"
+          onClick={() => handleAddToCart(product.id)}
+        >
           <MdAddShoppingCart />
           <span>Add to cart</span>
         </button>

@@ -39,8 +39,20 @@ export const productApi = createApi({
       invalidatesTags: ["Products"],
     }),
 
-    getCategories: builder.query({
-      query: () => "/categories",
+    createCategory: builder.mutation({
+      query: (data) => ({
+        url: "/categories/create",
+        method: "POST",
+        body: data,
+      }),
+    }),
+
+    getParentCategory: builder.query({
+      query: () => "/categories/parent",
+    }),
+
+    getChildCategory: builder.query({
+      query: () => "/categories/children",
     }),
 
     getCloudinarySignature: builder.query({
@@ -50,7 +62,7 @@ export const productApi = createApi({
     deleteImage: builder.mutation({
       query: (publicId) => ({
         url: "/cloudinary/deleteImage",
-        method: "Delete",
+        method: "DELETE",
         body: { publicId },
       }),
     }),
@@ -59,9 +71,11 @@ export const productApi = createApi({
 
 export const {
   useAddProductMutation,
-  useGetCategoriesQuery,
+  useGetParentCategoryQuery,
   useDeleteImageMutation,
+  useCreateCategoryMutation,
   useGetAllProductsQuery,
   useGetProductQuery,
+  useGetChildCategoryQuery,
   useLazyGetCloudinarySignatureQuery,
 } = productApi;

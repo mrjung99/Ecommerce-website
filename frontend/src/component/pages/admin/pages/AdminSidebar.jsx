@@ -8,6 +8,7 @@ import { FaFileInvoiceDollar } from "react-icons/fa";
 import { MdOutlineDashboard } from "react-icons/md";
 import { RxDashboard } from "react-icons/rx";
 import { FaUsers } from "react-icons/fa";
+import { TbCategoryPlus } from "react-icons/tb";
 
 const AdminSidebar = ({ collapsed }) => {
   const linkClass =
@@ -41,6 +42,16 @@ const AdminSidebar = ({ collapsed }) => {
         >
           <FaUsers size={22} />
           {!collapsed && <span>Users</span>}
+        </NavLink>
+
+        <NavLink
+          to="categories"
+          className={({ isActive }) =>
+            `${linkClass} ${isActive ? activeClass : ""}`
+          }
+        >
+          <TbCategoryPlus size={20} />
+          {!collapsed && <span>Categories</span>}
         </NavLink>
 
         <NavLink

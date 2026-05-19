@@ -2,28 +2,68 @@
 import { NavLink } from "react-router-dom";
 import { FiPlus, FiMinus, FiArrowLeft, FiShoppingCart } from "react-icons/fi";
 import { MdDelete } from "react-icons/md";
+import {
+  useClearCartMutation,
+  useDeleteCartItemMutation,
+  useGetUserCartQuery,
+} from "../../redux/features/product/cartApi";
+import { toast } from "react-toastify";
+import { useCallback } from "react";
+import Loader from "../ui/Loader";
 
 const Cart = () => {
-  // if (cartItem.length === 0) {
-  //   return (
-  //     <div className="min-h-[81vh] flex flex-col items-center justify-center">
-  //       <FiShoppingCart className="text-8xl text-gray-300 mb-6" />
-  //       <h1 className="text-xl font-bold text-gray-700 mb-4">
-  //         Your cart is empty
-  //       </h1>
-  //       <p className="text-gray-500 mb-8 text-sm text-center max-w-md">
-  //         Looks like you haven't added any products to your cart yet.
-  //       </p>
-  //       <NavLink
-  //         to="/product"
-  //         className="px-8 py-3 bg-orange-600 text-white text-sm rounded-lg hover:bg-orange-700 flex items-center gap-2"
-  //       >
-  //         <FiArrowLeft />
-  //         Start Shopping
-  //       </NavLink>
-  //     </div>
-  //   );
-  // }
+  const { data, isLoading, isFetching } = useGetUserCartQuery();
+  const [deleteItem] = useDeleteCartItemMutation();
+  const [clearCart] = useClearCartMutation();
+  const cartItems = data?.cart?.cart?.items || [];
+  const cart = data?.cart || [];
+  console.log("data: ", data);
+  console.log("cartItems: ", cartItems);
+
+  const handleDeleteItem = async (id) => {
+    try {
+      await deleteItem(id).unwrap();
+      toast.success("Item deleted successfully.");
+    } catch (error) {
+      toast.error("Failed to delete item.");
+    }
+  };
+
+  const handleClearCart = async () => {
+    try {
+      const result = await clearCart().unwrap();
+      console.log("clear result: ", result);
+
+      toast.success("Cart is cleared.");
+    } catch (error) {
+      console.log("clear error: ", error);
+
+      toast.error(error.data.message || "Failed to clear cart.");
+    }
+  };
+
+  if (isLoading || isFetching) return <Loader />;
+
+  if (!cartItems.length) {
+    return (
+      <div className="min-h-[81vh] flex flex-col items-center justify-center">
+        <FiShoppingCart className="text-8xl text-gray-300 mb-6" />
+        <h1 className="text-xl font-bold text-gray-700 mb-4">
+          Your cart is empty
+        </h1>
+        <p className="text-gray-500 mb-8 text-sm text-center max-w-md">
+          Looks like you haven't added any products to your cart yet.
+        </p>
+        <NavLink
+          to="/products"
+          className="px-8 py-3 bg-orange-600 text-white text-sm rounded-lg hover:bg-orange-700 flex items-center gap-2"
+        >
+          <FiArrowLeft />
+          Start Shopping
+        </NavLink>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen w-11/12 mx-auto">
@@ -33,9 +73,9 @@ const Cart = () => {
           <p className="text-[15px] leading-7 font-sans font-light">
             You have{" "}
             <span className="text-orange-500 font-medium">
-              {/* {cartItem.length} */}
-            </span>{" "}
-            Item in your cart
+              {cartItems.length + " "}
+            </span>
+            Item{cartItems.length > 1 ? "'s" : ""} in your cart
           </p>
         </div>
         <div className="py-3 flex gap-8">
@@ -51,20 +91,18 @@ const Cart = () => {
               </div>
 
               <div className="divide-y divide-gray-300">
-                {cartItem.map((item) => (
-                  <div key={item.id} className="grid grid-cols-12">
+                {cartItems.map((item) => (
+                  <div key={item.product.id} className="grid grid-cols-12">
                     <div className="col-span-5 flex items-center gap-4 p-2">
                       <img
-                        src={item.image}
-                        alt={item.name}
+                        src={item.product.images[0].thumbnail}
+                        alt={item.product.name}
                         className="shrink-0 w-10 h-10 rounded-lg object-cover"
                       />
                       <NavLink to={`/productDetails/${item.id}`}>
                         <p className="text-[15px] font-sans font-light cursor-hover:text-orange-600 transition-colors duration-300 ease-in-out">
-                          {truncateLongName(
-                            item.name.charAt(0).toUpperCase() +
-                              item.name.slice(1),
-                          )}
+                          {item.product.name.charAt(0).toUpperCase() +
+                            item.product.name.slice(1)}
                         </p>
                       </NavLink>
                     </div>
@@ -94,13 +132,13 @@ const Cart = () => {
 
                     <div className="col-span-2 flex items-center justify-center gap-3">
                       <p className="text-[14px] font-sans font-light">
-                        Rs. {item.price}
+                        Rs. {item.snapshotPrice}
                       </p>
                     </div>
 
                     <div className="col-span-2 flex items-center justify-center gap-3">
                       <p className="text-[14px] font-sans font-light">
-                        Rs. {item.price * item.quantity}
+                        Rs. {item.snapshotPrice * item.quantity}
                       </p>
                     </div>
 
@@ -108,7 +146,7 @@ const Cart = () => {
                       <MdDelete
                         size={20}
                         className="hover:text-red-600 cursor-pointer"
-                        onClick={() => removeFromCart(item.id)}
+                        onClick={() => handleDeleteItem(item.id)}
                       />
                     </div>
                   </div>
@@ -116,7 +154,7 @@ const Cart = () => {
               </div>
 
               <div className="flex justify-between items-center p-4 mt-10">
-                <NavLink to="/product">
+                <NavLink to="/products">
                   <p
                     className="flex gap-1.5 items-center text-blue-500 
                                 hover:text-blue-800 cursor-pointer transition-all duration-300 font-sans"
@@ -126,7 +164,7 @@ const Cart = () => {
                 </NavLink>
                 <button
                   className="border border-red-500 rounded text-red-500 text-sm hover:bg-red-50 cursor-pointer px-3 py-1 transition-all duration-300 font-sans"
-                  onClick={() => clearCart()}
+                  onClick={handleClearCart}
                 >
                   Clear Cart
                 </button>
@@ -140,17 +178,15 @@ const Cart = () => {
               <div className="space-y-3 font-sans font-light">
                 <div className="flex justify-between">
                   <span className="">Subtotal</span>
-                  <span className="">Rs. {totalPrice}</span>
+                  <span className="">Rs. {cart.subTotal}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="">Shipping</span>
-                  <span className="text-blue-500">
-                    {shipping === 0 ? "FREE" : `Rs. ${shipping}`}
-                  </span>
+                  <span className="text-blue-500">Free</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="">Tax (13%)</span>
-                  <span className="">Rs. {tax}</span>
+                  <span className="">Rs. {cart.vat}</span>
                 </div>
               </div>
               <div className="border-t border-gray-500 font-sans font-light my-3">
@@ -158,7 +194,7 @@ const Cart = () => {
                   <span className="text-lg">Grand Total</span>
                   <span className="">
                     <span className="text-orange-600 font-medium">
-                      Rs. {grandTotal}
+                      Rs.{cart.totalAmount}
                     </span>
                   </span>
                 </div>

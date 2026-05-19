@@ -2,11 +2,12 @@ import { useState } from "react";
 import { uploadImageToCloudinary } from "../../../../utils/upload-image";
 import { FaPlus } from "react-icons/fa";
 import { RxCross1 } from "react-icons/rx";
+import Select from "react-select";
 
 import {
   useAddProductMutation,
   useDeleteImageMutation,
-  useGetCategoriesQuery,
+  useGetChildCategoryQuery,
   useLazyGetCloudinarySignatureQuery,
 } from "../../../../redux/features/product/productApi";
 import { toast } from "react-toastify";
@@ -25,8 +26,13 @@ const AdminProduct = () => {
     categoryId: "",
   });
 
-  const { data } = useGetCategoriesQuery();
-  const categories = data?.categories;
+  const { data } = useGetChildCategoryQuery();
+  const categories = data?.childCategory;
+
+  const categoryOptions = categories?.map((category) => ({
+    value: category.id,
+    label: category.name,
+  }));
 
   const [createProduct, { isLoading }] = useAddProductMutation();
   const [deleteImage] = useDeleteImageMutation();
@@ -197,25 +203,56 @@ const AdminProduct = () => {
                   Category
                 </label>
 
-                <select
-                  name="categoryId"
-                  value={formData.categoryId}
-                  onChange={handleChange}
-                  required
-                  className="w-full border border-gray-500 rounded-lg px-3 py-2 text-sm text-gray-300 font-lighter focus:outline-none focus:ring-1 focus:ring-orange-200"
-                >
-                  {categories
-                    ?.filter((category) => category.children.length === 0)
-                    .map((category) => (
-                      <option
-                        key={category.id}
-                        value={category.id}
-                        className="bg-gray-800 text-gray-300 text-sm font-light capitalize"
-                      >
-                        {category.name}
-                      </option>
-                    ))}
-                </select>
+                <Select
+                  options={categoryOptions}
+                  value={categoryOptions?.find(
+                    (option) => option.value === formData.categoryId,
+                  )}
+                  onChange={(selectedOption) =>
+                    setFormData({
+                      ...formData,
+                      categoryId: selectedOption.value,
+                    })
+                  }
+                  placeholder="Select Category"
+                  className="text-sm cursor-pointer"
+                  classNamePrefix="react-select"
+                  styles={{
+                    control: (base, state) => ({
+                      ...base,
+                      backgroundColor: "#1f2937",
+                      color: "white",
+                      borderColor: state.isFocused ? "#fdba74" : "#6b7280",
+
+                      // REMOVE BLUE OUTLINE
+                      boxShadow: "none",
+                      outline: "none",
+
+                      cursor: "pointer",
+
+                      "&:hover": {
+                        borderColor: state.isFocused ? "#fdba74" : "#6b7280",
+                      },
+                    }),
+
+                    menu: (base) => ({
+                      ...base,
+                      backgroundColor: "#1f2937",
+                    }),
+
+                    option: (base, state) => ({
+                      ...base,
+                      backgroundColor: state.isFocused ? "#374151" : "#1f2937",
+                      color: "#fff",
+                      cursor: "pointer",
+                    }),
+
+                    singleValue: (base) => ({
+                      ...base,
+                      color: "#fff",
+                    }),
+                  }}
+                />
               </div>
             </div>
           </div>

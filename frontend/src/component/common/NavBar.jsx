@@ -14,6 +14,7 @@ import extractName from "../../utils/ExtractUserName";
 import { FaCaretDown } from "react-icons/fa";
 import truncateName from "../../utils/truncateName";
 import UserProfileOption from "../ui/UserProfileOption";
+import { useGetTotalCartItemQuery } from "../../redux/features/product/cartApi";
 
 const NavBar = () => {
   const [toggleSearch, setToggleSearch] = useState(false);
@@ -22,7 +23,8 @@ const NavBar = () => {
 
   const user = useSelector(selectCurrentUser);
   const { data } = useGetProfileQuery(undefined, { skip: !user }); // this will fetch the user profile only if logged in
-  console.log("user:", user);
+
+  const { data: cartItems, isLoading } = useGetTotalCartItemQuery();
 
   const avatarImage = data?.data?.profile?.avatarUrl;
   const userName = extractName(data);
@@ -94,7 +96,7 @@ const NavBar = () => {
               <div className="rounded-full h-9 w-9">
                 <img
                   src={avatarImage}
-                  alt="avatar image"
+                  alt=""
                   className="rounded-full object-cover"
                 />
               </div>

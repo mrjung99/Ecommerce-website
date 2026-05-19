@@ -9,6 +9,7 @@ import {
 } from "../../redux/features/auth/authSlice";
 import { useState } from "react";
 import Loader from "../ui/Loader";
+import { toast } from "react-toastify";
 
 const Login = () => {
   const [login, setLogin] = useState("");
@@ -37,10 +38,9 @@ const Login = () => {
       const data = await authLogin({ login, password }).unwrap();
       dispatch(setCredentials(data));
       redirectByRole(data.user.role, navigate);
-      console.log("Login successful.");
+      toast.success("Successfully logged in.");
     } catch (error) {
-      alert(error);
-      console.log(error);
+      toast.error(error.data.message || "Invalid credentials.");
     }
   };
 

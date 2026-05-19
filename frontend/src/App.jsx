@@ -35,6 +35,7 @@ import AdminPayment from "./component/pages/admin/pages/AdminPayment";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ProductDetails from "./component/pages/ProductDetails";
+import AdminCategories from "./component/pages/admin/pages/AdminCategories";
 
 const router = createBrowserRouter([
   {
@@ -97,6 +98,7 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <AdminDashboard /> },
       { path: "products", element: <AdminProduct /> },
+      { path: "categories", element: <AdminCategories /> },
       { path: "users", element: <AdminUsers /> },
       { path: "orders", element: <AdminOrders /> },
       { path: "payment", element: <AdminPayment /> },
@@ -136,7 +138,7 @@ const App = () => {
       {/* ✅ GLOBAL TOAST CONTAINER */}
       <ToastContainer
         position="top-right"
-        autoClose={4000}
+        autoClose={2000}
         hideProgressBar={false}
         newestOnTop
         closeOnClick
