@@ -25,10 +25,10 @@ const AdminCategories = () => {
   const parentCategories = parent?.parentCategory ?? [];
   const parentCategoryOptions = parentCategories?.map((category) => ({
     value: category.id,
-    label: category.name,
+    label: category.name.charAt(0).toUpperCase() + category.name.slice(1),
   }));
 
-  const handleCreateParent = async () => {
+  const handleCreateParent = async (e) => {
     try {
       await addCategory(createParent).unwrap();
 
@@ -43,7 +43,7 @@ const AdminCategories = () => {
     }
   };
 
-  const handleCreateChildren = async () => {
+  const handleCreateChildren = async (e) => {
     try {
       await addCategory(createCategory).unwrap();
       toast.success("Children category added successfully.");
@@ -60,8 +60,8 @@ const AdminCategories = () => {
   };
 
   return (
-    <div className="w-full  grid grid-cols-1 md:grid-cols-2 gap-8 p-5">
-      <div className="w-full col-span-1 border border-gray-600 bg-gray-700/10 p-8 rounded-2xl">
+    <div className="w-full h-lvh grid grid-cols-1 md:grid-cols-2 gap-10 p-5">
+      <div className="w-full col-span-1 max-h-65 border border-gray-600 bg-gray-700/10 p-8 rounded-2xl">
         <p className="mb-3 text-gray-300">Add Parent category</p>
         <div className="w-full">
           <label htmlFor="" className="text-sm text-gray-300 font-thin">
@@ -69,11 +69,14 @@ const AdminCategories = () => {
           </label>
           <input
             type="text"
+            value={createParent.name}
             placeholder="Electronics"
             className="w-full border mt-1 font-thin text-gray-300 border-gray-400 px-3 py-2 rounded-md focus:outline-none focus:ring-1 focus:ring-orange-200"
             onChange={(e) =>
               setCreateParent({
-                name: e.target.value,
+                name:
+                  e.target.value.charAt(0).toUpperCase() +
+                  e.target.value.slice(1),
                 slug: e.target.value.toLowerCase().replace(/\s+/g, "-"),
               })
             }
@@ -90,7 +93,7 @@ const AdminCategories = () => {
         </div>
       </div>
 
-      <div className="md:w-11/12 col-span-1 border border-gray-600 rounded-2xl bg-gray-700/10 p-7 space-y-2">
+      <div className="md:w-11/12 max-h-65 col-span-1 border border-gray-600 rounded-2xl bg-gray-700/10 p-7 space-y-2">
         <p className="text-gray-300">Add Children category</p>
         <div className="flex flex-col gap-7 mt-4">
           <Select
@@ -130,6 +133,10 @@ const AdminCategories = () => {
               menu: (base) => ({
                 ...base,
                 backgroundColor: "#1f2937",
+                left: "50%",
+                transform: "translateX(-50%)",
+                width: "max-content",
+                minWidth: "100%",
               }),
 
               option: (base, state) => ({
@@ -141,7 +148,7 @@ const AdminCategories = () => {
 
               singleValue: (base) => ({
                 ...base,
-                color: "#fff",
+                color: "#d1d5db",
               }),
             }}
           />
@@ -149,12 +156,15 @@ const AdminCategories = () => {
           <div className="w-full">
             <input
               type="text"
+              value={createCategory.name}
               placeholder="Enter child category"
               className="py-2 px-4 border border-gray-400 w-full rounded-md text-gray-300 font-thin focus:outline-none focus:ring-1 focus:ring-orange-200"
               onChange={(e) =>
                 setCreateCategory((prev) => ({
                   ...prev,
-                  name: e.target.value,
+                  name:
+                    e.target.value.charAt(0).toUpperCase() +
+                    e.target.value.slice(1),
                   slug: e.target.value.toLowerCase().replace(/\s+/g, "-"),
                 }))
               }

@@ -18,15 +18,17 @@ export const productApi = createApi({
     },
   }),
 
-  tagTypes: ["Products"],
+  tagTypes: ["Products", "Categories"],
 
   endpoints: (builder) => ({
     getAllProducts: builder.query({
       query: () => "/products",
+      providesTags: ["Products"],
     }),
 
     getProduct: builder.query({
       query: (id) => `/products/${id}`,
+      providesTags: ["Products"],
     }),
 
     addProduct: builder.mutation({
@@ -45,14 +47,18 @@ export const productApi = createApi({
         method: "POST",
         body: data,
       }),
+
+      invalidatesTags: ["Categories"],
     }),
 
     getParentCategory: builder.query({
       query: () => "/categories/parent",
+      providesTags: ["Categories"],
     }),
 
     getChildCategory: builder.query({
       query: () => "/categories/children",
+      providesTags: ["Categories"],
     }),
 
     getCloudinarySignature: builder.query({

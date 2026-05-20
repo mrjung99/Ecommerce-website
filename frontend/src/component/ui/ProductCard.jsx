@@ -2,9 +2,17 @@ import { MdAddShoppingCart } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 import { useAddToCartMutation } from "../../redux/features/product/cartApi";
 import { toast } from "react-toastify";
+import { useSelector } from "react-redux";
+import {
+  selectAccessToken,
+  selectCurrentUser,
+} from "../../redux/features/auth/authSlice";
 
 const ProductCard = ({ product }) => {
   const navigate = useNavigate();
+  const user = useSelector(selectCurrentUser);
+  const accessToken = useSelector(selectAccessToken);
+
   const goToDetails = () => {
     navigate(`/productDetails/${product.id}`);
   };
@@ -12,6 +20,10 @@ const ProductCard = ({ product }) => {
   const [addToCart] = useAddToCartMutation();
 
   const handleAddToCart = async (productId, quantity = 1) => {
+    if (!user || !accessToken) {
+      navigate("/login");
+      return;
+    }
     try {
       await addToCart({ productId, quantity }).unwrap();
     } catch (error) {

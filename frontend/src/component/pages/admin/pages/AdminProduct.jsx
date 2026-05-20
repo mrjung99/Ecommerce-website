@@ -31,7 +31,7 @@ const AdminProduct = () => {
 
   const categoryOptions = categories?.map((category) => ({
     value: category.id,
-    label: category.name,
+    label: category.name.charAt(0).toUpperCase() + category.name.slice(1),
   }));
 
   const [createProduct, { isLoading }] = useAddProductMutation();
