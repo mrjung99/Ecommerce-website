@@ -37,13 +37,29 @@ export class CartController {
   async getCart(@Request() req) {
     const cart = await this.cartService.getOrCreateCart(req.user.id);
 
-    if (cart.items.length <= 0) {
-      throw new BadRequestException('Your cart is empty.');
+    if (cart.items.length === 0) {
+      return {
+        success: true,
+        cart: {
+          cart,
+          subTotal: 0,
+          vat: 0,
+          totalAmount: 0,
+        },
+      };
     }
+
+    const cartTotal = cart.items.reduce(
+      (index, item) => index + item.quantity * item.snapshotPrice!,
+      0,
+    );
+
+    const vatAmount = (cartTotal * 13) / 100;
+    const withVat = cartTotal + vatAmount;
 
     return {
       success: true,
-      cart,
+      cart: { cart, subTotal: cartTotal, vat: vatAmount, totalAmount: withVat },
     };
   }
 
@@ -71,7 +87,7 @@ export class CartController {
     const item = await this.cartService.addItem(req.user.id, dto);
     return {
       success: true,
-      message: 'Product added to cart successfully.',
+      message: 'Product added to cart.',
       item,
     };
   }
@@ -131,6 +147,7 @@ export class CartController {
   @ApiNotFoundResponse({ description: 'Product not found.' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   async clearCart(@Request() req) {
+    console.log('Clear cart controller is called.');
     const message = await this.cartService.clearCart(req.user.id);
     return {
       status: 'success',

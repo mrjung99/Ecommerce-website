@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { CreateProductCategoryDto } from './dto/create-product-category.dto';
-import { IsNull, Repository } from 'typeorm';
+import { IsNull, Not, Repository } from 'typeorm';
 import { ProductCategory } from './entities/product-category.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 
@@ -49,11 +49,19 @@ export class ProductCategoryService {
     return this.productCategoryRepo.save(category);
   }
 
-  //* ------------------------ GET ALL CATEGORY -----------------------------
-  async getAll(): Promise<ProductCategory[]> {
+  //* ------------------------ GET PARENT CATEGORY -----------------------------
+  async getParentCategory(): Promise<ProductCategory[]> {
     return await this.productCategoryRepo.find({
-      // where: { id: IsNull() },
+      where: { parent: IsNull() },
       relations: ['children'],
+    });
+  }
+
+  //* ---------------- GET ALL PARENT CATEGORY ----------------
+  async getChildCategory() {
+    return await this.productCategoryRepo.find({
+      where: { parent: Not(IsNull()) },
+      relations: ['parent'],
     });
   }
 

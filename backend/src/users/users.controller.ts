@@ -75,7 +75,7 @@ export class UsersController {
   @ApiOperation({ summary: 'Verify user' })
   @ApiOkResponse({ description: 'Success' })
   @ApiBadRequestResponse({ description: 'Bad request' })
-  @ApiNotFoundResponse({ description: ' not found.' })
+  @ApiNotFoundResponse({ description: 'not found' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   async verifyUser(@Body() dto: VerifyUserDto) {
     const message = await this.usersService.verifyUser(dto);
