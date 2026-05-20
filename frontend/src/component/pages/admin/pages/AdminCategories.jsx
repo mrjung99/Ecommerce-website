@@ -105,9 +105,10 @@ const AdminCategories = () => {
             }
             onChange={(selectedOption) => {
               if (!selectedOption) return;
-              setCreateCategory({
+              setCreateCategory((prev) => ({
+                ...prev,
                 parentId: selectedOption.value,
-              });
+              }));
             }}
             placeholder="Select main category"
             className="text-sm cursor-pointer w-full"
