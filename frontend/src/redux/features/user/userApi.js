@@ -31,11 +31,13 @@ export const userApi = createApi({
     }),
 
     verifyOtp: builder.mutation({
-      query:(data)=>({
-         url:'/users/'
-      })
-    })
+      query: (data) => ({
+        url: "/users/verify",
+        method: "POST",
+        body: data,
+      }),
+    }),
   }),
 });
 
-export const { useSignUpMutation } = userApi;
+export const { useSignUpMutation, useVerifyOtpMutation } = userApi;

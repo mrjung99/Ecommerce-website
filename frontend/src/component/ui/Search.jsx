@@ -16,7 +16,7 @@ const Search = ({ toggleSearch, setToggleSearch }) => {
         <input
           type="text"
           placeholder="Search for product..."
-          className="text-sm font-sans text-gray-700 h-9 px-4 w-[60%] bg-white/40 backdrop-blur-xl outline-0 border border-orange-600 rounded-l-full"
+          className="text-sm font-sans text-gray-700 h-9 px-4 w-[61%] bg-white/40 backdrop-blur-xl outline-0 border border-orange-600 rounded-l-full"
         />
 
         <button className="cursor-pointer text-white border border-orange-600 bg-orange-600 rounded-r-full px-4 h-9">
