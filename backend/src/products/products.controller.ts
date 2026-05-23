@@ -21,6 +21,7 @@ import { Public } from '../auth/decorator/public.decorator';
 import { FilterProductDto } from './dto/filter-product.dto';
 import { SkipThrottle } from '@nestjs/throttler';
 import { ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
+
 @Controller('products')
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
@@ -77,6 +78,7 @@ export class ProductsController {
   }
 
   //* ----------------------- GET PRODUCT BY ID ---------------------
+  @Public()
   @Get(':id')
   @ApiOperation({ summary: 'Get product by id.' })
   @ApiResponse({ status: 200, description: 'Product fetched successfully.' })
@@ -87,7 +89,7 @@ export class ProductsController {
     }
 
     return {
-      status: 'success',
+      success: true,
       data: product,
     };
   }
