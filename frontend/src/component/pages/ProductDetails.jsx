@@ -11,9 +11,8 @@ const ProductDetails = () => {
   const [quantity, setQuantity] = useState(1);
   const inWishList = true;
 
-  const { data, isLoading } = useGetProductQuery(id);
+  const { data, isLoading, error } = useGetProductQuery(id);
   if (isLoading) return <Loader />;
-  console.log("product details: ", data);
 
   const handleQuantityChange = (e) => {
     const value = parseInt(e.target.value) || 1;
@@ -126,7 +125,13 @@ const ProductDetails = () => {
       </div>
 
       <div className="bg-gray-100 p-3 mt-8">
-        <p className="text-2xl text-gray-800">Product Details of</p>
+        <p className="text-2xl text-gray-800">
+          Product Detail of{" "}
+          <span className="text-blue-500">
+            {data?.data?.name?.charAt(0).toUpperCase() +
+              data?.data?.name?.slice(1)}
+          </span>
+        </p>
         <p className="border border-gray-300 text-[15px] p-2 font-sans font-thin mt-2">
           {data?.data?.description}
         </p>
