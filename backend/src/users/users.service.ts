@@ -60,7 +60,7 @@ export class UsersService {
       );
 
       await this.otpService.saveOtpInfo(user, hashedOtp, expiresAt);
-      return savedUser;
+      return savedUser.email;
     } catch (error: any) {
       if (error.code === '23505') {
         if (error.detail.includes('email')) {

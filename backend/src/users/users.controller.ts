@@ -35,9 +35,10 @@ export class UsersController {
   @ApiNotFoundResponse({ description: ' not found.' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   async createUser(@Body() dto: CreateUserDto) {
-    await this.usersService.createUser(dto);
+    const email = await this.usersService.createUser(dto);
     return {
       success: true,
+      email,
       message: 'User created successfully.',
     };
   }
