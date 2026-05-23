@@ -14,7 +14,8 @@ import extractName from "../../utils/ExtractUserName";
 import { FaCaretDown } from "react-icons/fa";
 import truncateName from "../../utils/truncateName";
 import UserProfileOption from "../ui/UserProfileOption";
-import { useGetTotalCartItemQuery } from "../../redux/features/product/cartApi";
+
+import { RxAvatar } from "react-icons/rx";
 
 const NavBar = () => {
   const [toggleSearch, setToggleSearch] = useState(false);
@@ -25,6 +26,8 @@ const NavBar = () => {
   const { data } = useGetProfileQuery(undefined, { skip: !user }); // this will fetch the user profile only if logged in
 
   const avatarImage = data?.data?.profile?.avatarUrl;
+  console.log(avatarImage);
+
   const userName = extractName(data);
 
   useEffect(() => {
@@ -91,13 +94,17 @@ const NavBar = () => {
 
           {user ? (
             <div className="relative group flex items-center justify-center gap-1 ml-2 cursor-pointer">
-              <div className="rounded-full h-9 w-9">
-                <img
-                  src={avatarImage}
-                  alt=""
-                  className="rounded-full object-cover"
-                />
-              </div>
+              {avatarImage ? (
+                <div className="rounded-full h-9 w-9 overflow-hidden">
+                  <img
+                    src={avatarImage}
+                    alt="profile"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ) : (
+                <RxAvatar />
+              )}
               <div className="text-center flex gap-1 h-full">
                 <div className="flex flex-col items-center justify-center mb-1">
                   <p className="text-[11px] font-light text-gray-800">
