@@ -44,7 +44,7 @@ const ProductCard = ({ product }) => {
         flex
         flex-col
         justify-between
-        shadow-[0_0_2px_rgba(0,0,0,0.2)]
+        shadow-[0_0_2px_rgba(0,0,0,0.3)]
         hover:shadow-[0_0_10px_rgba(0,0,0,0.15)]
         hover:bg-gray-50
         transition-all
@@ -80,7 +80,7 @@ const ProductCard = ({ product }) => {
           hover:text-blue-400
           font-sans
           line-clamp-2
-          min-h-12
+          min-h-8
         "
         onClick={goToDetails}
       >
