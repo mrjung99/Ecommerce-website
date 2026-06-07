@@ -46,7 +46,7 @@ import googleOauthConfig from './configuration/google-oauth.config';
         return {
           type: 'postgres',
           autoLoadEntities: true,
-          synchronize: true,
+          synchronize: !isProd,
 
           ...(isProd
             ? {
