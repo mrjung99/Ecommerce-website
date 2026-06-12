@@ -139,14 +139,14 @@ const App = () => {
     <>
       {/* ✅ GLOBAL TOAST CONTAINER */}
       <ToastContainer
-        position="bottom-left"
+        position="top-right"
         autoClose={2000}
         hideProgressBar={false}
         newestOnTop
         closeOnClick
         pauseOnHover
         draggable
-        theme="light"
+        theme="colored"
       />
 
       <RouterProvider router={router} />
