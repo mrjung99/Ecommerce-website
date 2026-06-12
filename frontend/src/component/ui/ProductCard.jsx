@@ -10,6 +10,7 @@ import {
 
 const ProductCard = ({ product }) => {
   const navigate = useNavigate();
+  console.log("product: ", product);
 
   const user = useSelector(selectCurrentUser);
   const accessToken = useSelector(selectAccessToken);
@@ -28,7 +29,7 @@ const ProductCard = ({ product }) => {
 
     try {
       await addToCart({ productId, quantity }).unwrap();
-      toast.success("Product added to cart");
+      // toast.success("Product added to cart");
     } catch (error) {
       toast.error("Something went wrong.");
     }

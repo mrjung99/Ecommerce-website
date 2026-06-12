@@ -6,6 +6,7 @@ import {
   useClearCartMutation,
   useDeleteCartItemMutation,
   useGetUserCartQuery,
+  useUpdateCartItemMutation,
 } from "../../redux/features/product/cartApi";
 import { toast } from "react-toastify";
 import { useCallback } from "react";
@@ -15,7 +16,11 @@ const Cart = () => {
   const { data, isLoading, isFetching } = useGetUserCartQuery();
   const [deleteItem] = useDeleteCartItemMutation();
   const [clearCart] = useClearCartMutation();
+  const [updateCartItem] = useUpdateCartItemMutation();
+
   const cartItems = data?.cart?.cart?.items || [];
+  console.log("Cart Item: ", cartItems);
+
   const cart = data?.cart || [];
 
   const handleDeleteItem = async (id) => {
@@ -32,6 +37,24 @@ const Cart = () => {
     } catch (error) {
       toast.error(error.data.message || "Failed to clear cart.");
     }
+  };
+
+  const handleIncrease = async (item) => {
+    if (item.quantity >= item.product.stock) return;
+
+    await updateCartItem({
+      itemId: item.product.id,
+      quantity: item.quantity + 1,
+    }).unwrap();
+  };
+
+  const handleDecrease = async (item) => {
+    if (item.quantity <= 1) return;
+
+    await updateCartItem({
+      itemId: item.product.id,
+      quantity: item.quantity - 1,
+    }).unwrap();
   };
 
   if (isLoading || isFetching) return <Loader />;
@@ -102,9 +125,7 @@ const Cart = () => {
                     <div className="col-span-2 flex items-center justify-center gap-3">
                       <button
                         className={`cursor-pointer ${item.quantity === 1 ? "bg-gray-100" : "bg-gray-200"}`}
-                        onClick={() =>
-                          updateQuantity(item.id, item.quantity - 1)
-                        }
+                        onClick={() => handleDecrease(item)}
                         disabled={item.quantity === 1}
                       >
                         <FiMinus />
@@ -114,9 +135,7 @@ const Cart = () => {
                       </span>
                       <button
                         className="cursor-pointer bg-gray-200"
-                        onClick={() =>
-                          updateQuantity(item.id, item.quantity + 1)
-                        }
+                        onClick={() => handleIncrease(item)}
                       >
                         <FiPlus />
                       </button>

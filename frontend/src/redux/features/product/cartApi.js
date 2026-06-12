@@ -48,6 +48,17 @@ export const cartApi = createApi({
       invalidatesTags: ["Cart"],
     }),
 
+    updateCartItem: builder.mutation({
+      query: ({ itemId, quantity }) => ({
+        url: `/cart/${itemId}`,
+        method: "PATCH",
+        body: {
+          quantity,
+        },
+      }),
+      invalidatesTags: ["Cart"],
+    }),
+
     clearCart: builder.mutation({
       query: () => ({
         url: "/cart",
@@ -65,4 +76,5 @@ export const {
   useGetUserCartQuery,
   useDeleteCartItemMutation,
   useClearCartMutation,
+  useUpdateCartItemMutation,
 } = cartApi;

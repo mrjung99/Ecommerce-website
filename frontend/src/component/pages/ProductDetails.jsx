@@ -1,22 +1,50 @@
 import { useState } from "react";
-import { NavLink, useParams } from "react-router-dom";
+import { NavLink, useNavigate, useParams } from "react-router-dom";
 import { IoIosAdd } from "react-icons/io";
 import { RiSubtractLine } from "react-icons/ri";
 import { FiArrowLeft, FiHeart } from "react-icons/fi";
 import { useGetProductQuery } from "../../redux/features/product/productApi";
 import Loader from "../ui/Loader";
+import { useAddToCartMutation } from "../../redux/features/product/cartApi";
+import { toast } from "react-toastify";
+import { useSelector } from "react-redux";
+import {
+  selectAccessToken,
+  selectCurrentUser,
+} from "../../redux/features/auth/authSlice";
 
 const ProductDetails = () => {
   const { id } = useParams();
   const [quantity, setQuantity] = useState(1);
   const inWishList = true;
+  const [addToCart] = useAddToCartMutation();
+  const user = useSelector(selectCurrentUser);
+  const accessToken = useSelector(selectAccessToken);
+  const navigate = useNavigate();
 
   const { data, isLoading, error } = useGetProductQuery(id);
   if (isLoading) return <Loader />;
 
   const handleQuantityChange = (e) => {
     const value = parseInt(e.target.value) || 1;
-    setQuantity(value < 1 ? 1 : value);
+    setQuantity(Math.max(1, Math.min(value, data?.data?.stock || 1)));
+  };
+
+  const handleAddToCart = async () => {
+    if (!user || !accessToken) {
+      navigate("/login");
+      return;
+    }
+
+    try {
+      await addToCart({
+        productId: data?.data?.id,
+        quantity,
+      }).unwrap();
+      toast.success("Product added to cart.");
+    } catch (error) {
+      toast.error(error.data.message || "Something went wrong");
+    }
   };
 
   return (
@@ -85,7 +113,10 @@ const ProductDetails = () => {
               <button
                 className="flex items-center justify-center cursor-pointer
                                 bg-gray-300 px-1"
-                onClick={() => setQuantity((prev) => prev + 1)}
+                disabled={quantity >= data?.data?.stock}
+                onClick={() =>
+                  setQuantity((prev) => Math.min(prev + 1, data?.data?.stock))
+                }
               >
                 <IoIosAdd size={20} />
               </button>
@@ -102,7 +133,7 @@ const ProductDetails = () => {
             <button
               className="bg-orange-600 hover:bg-orange-700 cursor-pointer 
                             transition-colors text-white px-3 py-1 rounded"
-              //   onClick={() => addToCart(productDetails, quantity)}
+              onClick={handleAddToCart}
             >
               Add to Cart
             </button>
