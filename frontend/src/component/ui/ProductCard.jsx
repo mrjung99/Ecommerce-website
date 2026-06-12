@@ -10,7 +10,6 @@ import {
 
 const ProductCard = ({ product }) => {
   const navigate = useNavigate();
-  console.log("product: ", product);
 
   const user = useSelector(selectCurrentUser);
   const accessToken = useSelector(selectAccessToken);

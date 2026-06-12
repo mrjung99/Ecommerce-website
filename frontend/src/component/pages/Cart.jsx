@@ -19,7 +19,6 @@ const Cart = () => {
   const [updateCartItem] = useUpdateCartItemMutation();
 
   const cartItems = data?.cart?.cart?.items || [];
-  console.log("Cart Item: ", cartItems);
 
   const cart = data?.cart || [];
 

@@ -126,7 +126,7 @@ const ProductDetails = () => {
           <div className="flex items-center gap-4 text-[14px] mt-6">
             <button
               className="bg-blue-600 hover:bg-blue-700 cursor-pointer 
-                            transition-colors text-white px-3 py-1 rounded"
+              transition-colors text-white px-3 py-1 rounded"
             >
               Buy Now
             </button>
