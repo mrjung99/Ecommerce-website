@@ -56,7 +56,7 @@ const Cart = () => {
     }).unwrap();
   };
 
-  if (isLoading || isFetching) return <Loader />;
+  if (isLoading) return <Loader />;
 
   if (!cartItems.length) {
     return (

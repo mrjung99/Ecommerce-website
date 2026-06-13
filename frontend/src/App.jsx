@@ -137,7 +137,6 @@ const App = () => {
 
   return (
     <>
-      {/* ✅ GLOBAL TOAST CONTAINER */}
       <ToastContainer
         position="top-right"
         autoClose={2000}
